@@ -1,0 +1,30 @@
+{
+    "name": "laazys",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "private": true,
+    "scripts": {
+        "build:packages": "pnpm -r --if-present run build",
+        "test": "pnpm -r --if-present run test"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@babel/preset-env": "^7.24.0",
+        "@babel/preset-typescript": "^7.23.3",
+        "@types/jest": "^29.5.12",
+        "@types/node": "^20.11.24",
+        "eslint": "^8.56.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-jest": "^27.9.0",
+        "eslint-plugin-vue": "^9.21.1",
+        "jest": "^29.7.0",
+        "prettier": "^3.2.5",
+        "prettier-plugin-tailwindcss": "^0.5.11",
+        "ts-jest": "^29.1.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.3.3"
+    }
+}
