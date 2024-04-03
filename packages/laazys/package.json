@@ -1,0 +1,28 @@
+{
+  "name": "@gianlucabombaradev/laazys",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".dist/index.js",
+  "scripts": {
+    "tsc:fix": "node ./scripts/tsc-fix",
+    "build": "tsc && pnpm run tsc:fix",
+    "start:laazys": "node ./dist/bin/laazys.js"
+  },
+  "bin": {
+    "laazys": "./dist/bin/laazys.js"
+  },
+  "type": "module",
+  "private": true,
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/figlet": "^1.5.8",
+    "chalk": "^5.3.0",
+    "express": "^4.19.2",
+    "figlet": "^1.7.0",
+    "vue-docgen-api": "^4.78.0",
+    "yargs": "^17.7.2"
+  }
+}
