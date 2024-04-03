@@ -9,6 +9,9 @@
         "test": "pnpm -r --if-present run test"
     },
     "keywords": [],
+    "workspaces": [
+        "packages/*"
+    ],
     "author": "",
     "license": "MIT",
     "devDependencies": {
