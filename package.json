@@ -6,7 +6,8 @@
     "private": true,
     "scripts": {
         "build:packages": "pnpm -r --if-present run build",
-        "test": "pnpm -r --if-present run test"
+        "test": "pnpm -r --if-present run test",
+        "add:laazy-app": "pnpm add @gianlucabombaradev/laazys-app@workspace:* --filter @gianlucabombaradev/laazys"
     },
     "keywords": [],
     "workspaces": [
