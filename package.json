@@ -13,6 +13,10 @@
     "workspaces": [
         "packages/*"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/GianlucaBombaraDev/laazys.git",
+    },
     "author": "",
     "license": "MIT",
     "devDependencies": {
