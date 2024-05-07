@@ -1,0 +1,61 @@
+<script setup lang="ts">
+import { useFileStore } from '../store/file.store'
+
+interface Props {
+    title: string
+    items: []
+}
+
+withDefaults(defineProps<Props>(), {
+    title: '',
+    items: () => [],
+})
+
+const fileStore = useFileStore()
+const current_file = fileStore.getCurrentFile()
+
+const mapStatus = {
+    deprecated: 'bg-deprecated-bg text-deprecated-text',
+    alpha: 'bg-alpha-bg text-aplha-text',
+    beta: 'bg-beta-bg text-beta-text',
+    preAlpha: 'bg-preAlpha-bg text-preAlpha-text',
+    inProgress: 'bg-warning-bg text-warning-text',
+    ready: 'bg-success-bg text-success-text',
+}
+
+function getStatus(status: string): string {
+    let statusKey = status.toLowerCase()
+    return mapStatus[statusKey] !== undefined ? mapStatus[statusKey] : ''
+}
+</script>
+
+<template>
+    <div class="mb-4 flex flex-col">
+        <h4 class="font-semibold">{{ title }}</h4>
+
+        <ul>
+            <router-link
+                v-for="(item, itemKey) in items"
+                :key="itemKey"
+                :to="{ name: 'file', params: { id: item.id } }"
+                class="flex cursor-pointer items-center justify-between p-2"
+            >
+                <span class="flex items-center">
+                    <span
+                        class="inline-block truncate"
+                        :class="[
+                            current_file === item.id ? 'font-semibold' : '',
+                            item?.status.toLowerCase() === 'deprecated' ? 'line-through' : '',
+                        ]"
+                    >
+                        {{ item.name }}
+                    </span>
+                </span>
+
+                <span v-if="item?.status" class="ml-[10px] rounded-full p-1 text-xs" :class="[getStatus(item.status)]">
+                    {{ item.status }}
+                </span>
+            </router-link>
+        </ul>
+    </div>
+</template>
