@@ -4,5 +4,5 @@
         "outDir": "./dist"
     },
     "include": ["./bin/*.ts", "index.ts", "./utils/*.ts"],
-    "exclude": ["node_modules", "__tests__", "test", "scripts"]
+    "exclude": ["node_modules", "__tests__", "scripts", "dist", "test"]
 }

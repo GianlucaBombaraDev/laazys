@@ -20,9 +20,15 @@
     "@types/express": "^4.17.21",
     "@types/figlet": "^1.5.8",
     "chalk": "^5.3.0",
+    "comment-parser": "^1.4.1",
     "express": "^4.19.2",
     "figlet": "^1.7.0",
     "vue-docgen-api": "^4.78.0",
     "yargs": "^17.7.2"
+  },
+  "dependencies": {
+    "@gianlucabombaradev/laazys-app": "workspace:^",
+    "open": "^10.1.0",
+    "prettier-plugin-vue": "^1.1.6"
   }
 }
