@@ -1,0 +1,47 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  # Fetches all history for all tags and branches
+                  fetch-depth: 0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+
+            - name: Install PNPM
+              run: npm install -g pnpm
+
+            - name: Install Dependencies - Laazys App
+              run: pnpm install
+              working-directory: ./packages/laazys-app
+
+            - name: Build Laazys App
+              run: pnpm run build
+              working-directory: ./packages/laazys-app
+ 
+            - name: Install Dependencies - Laazys
+              run: pnpm install
+              working-directory: ./packages/laazys
+
+            - name: Build Laazys
+              run: pnpm run build
+              working-directory: ./packages/laazys
+
+            - name: Publish to GitHub Packages
+              run: npm publish
+              env:
+                NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            
