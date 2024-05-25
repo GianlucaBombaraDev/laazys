@@ -1,5 +1,8 @@
+//@ts-ignore
 import { createApp } from 'vue'
+//@ts-ignore
 import { createWebHistory, createRouter } from 'vue-router'
+//@ts-ignore
 import { createPinia } from 'pinia'
 
 import './index.css'
