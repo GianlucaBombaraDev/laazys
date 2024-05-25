@@ -1,3 +1,7 @@
 {
-    "conventionalCommits.scopes": ["setup", "laazys"]
+    "conventionalCommits.scopes": [
+        "setup",
+        "laazys",
+        "types"
+    ]
 }
