@@ -3,7 +3,6 @@
     "version": "0.1.0-alpha.1",
     "description": "",
     "main": "index.js",
-    "private": true,
     "scripts": {
         "build:packages": "pnpm -r --if-present run build",
         "test": "pnpm -r --if-present run test",
