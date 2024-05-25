@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import IProp from '../types/file.type'
 
-defineProps<(properties: IProp[], label:string)>()
+defineProps<{
+    properties: IProp[], 
+    label:string
+}>()
 
 function getTypeColor(type: string) {
     const typeMap:{[key:string]: string} = {
