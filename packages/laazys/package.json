@@ -12,7 +12,6 @@
     "laazys": "./dist/bin/laazys.js"
   },
   "type": "module",
-  "private": true,
   "keywords": [],
   "author": "",
   "license": "ISC",
