@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import IProp from '../types/file.type'
+import {IProp} from '../types/file.type'
 
 defineProps<{
     properties: IProp[], 
