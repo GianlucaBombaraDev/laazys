@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { useFileStore } from '../store/file.store.js'
-import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 import AppList from './AppList.vue'
 
+type File = {
+    extension: string
+    name: string
+    id:string
+    status: string
+}
+
 interface Props {
-    files?: []
+    files?: File[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
     files: () => [],
 })
-
-const router = useRouter()
-const fileStore = useFileStore()
-const { current_file } = storeToRefs(fileStore)
 
 const componentList = computed<any>(
     () => props.files && mapFiles(props.files.filter((file) => file.extension === 'vue')),

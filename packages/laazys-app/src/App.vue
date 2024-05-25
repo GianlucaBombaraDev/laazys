@@ -6,6 +6,7 @@ import AppThemeSwitch from './components/AppThemeSwitch.vue'
 import { useRouter } from 'vue-router'
 import AppFileList from './components/AppFileList.vue'
 import { useFiles } from './composable/useFiles'
+//@ts-ignore
 import { useFileStore } from './store/file.store.js'
 import { storeToRefs } from 'pinia'
 

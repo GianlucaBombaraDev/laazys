@@ -1,9 +1,16 @@
 <script setup lang="ts">
+//@ts-ignore
 import { useFileStore } from '../store/file.store'
+
+type Item = {
+    id: string
+    name: string
+    status: string
+}
 
 interface Props {
     title: string
-    items: []
+    items: Item[]
 }
 
 withDefaults(defineProps<Props>(), {
@@ -14,7 +21,7 @@ withDefaults(defineProps<Props>(), {
 const fileStore = useFileStore()
 const current_file = fileStore.getCurrentFile()
 
-const mapStatus = {
+const mapStatus:{[key:string]: string} = {
     deprecated: 'bg-deprecated-bg text-deprecated-text',
     alpha: 'bg-alpha-bg text-aplha-text',
     beta: 'bg-beta-bg text-beta-text',

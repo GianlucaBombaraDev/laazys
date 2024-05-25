@@ -2,27 +2,31 @@
 import AppFileHeader from '../components/AppFileHeader.vue'
 import AppSourceCode from '../components/AppSourceCode.vue'
 import AppFileProperties from '../components/AppFileProperties.vue'
+//@ts-ignore
 import { useFileStore } from '../store/file.store'
 import { useRoute } from 'vue-router'
 import { watch, ref, onMounted } from 'vue'
+import {File} from '../types/file.type'
 
 const route = useRoute()
 
 const fileStore = useFileStore()
-const current_file = ref(null)
+const current_file = ref<File | null>(null)
 
-function initFile(id) {
+function initFile(id: string | number) {
     current_file.value = fileStore.getCurrentFile(id)
 }
 
 watch(
     () => route.params.id,
-    (newId, oldId) => {
+    (newId) => {
+        //@ts-ignore
         initFile(newId)
     },
 )
 
 onMounted(() => {
+    //@ts-ignore
     initFile(route.params.id)
 })
 </script>

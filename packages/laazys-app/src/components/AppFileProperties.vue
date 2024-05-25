@@ -1,26 +1,10 @@
 <script setup lang="ts">
-interface IPropType {
-    name?: string
-}
+import IProp from '../types/file.type'
 
-interface IProp {
-    name?: string
-    defaultValue?: string
-    type?: IPropType
-}
-
-interface Props {
-    properties?: IProp[]
-    label: string
-}
-
-const props = withDefaults(defineProps<Props>(), {
-    properties: () => [],
-    label: 'prop',
-})
+defineProps<(properties: IProp[], label:string)>()
 
 function getTypeColor(type: string) {
-    const typeMap = {
+    const typeMap:{[key:string]: string} = {
         boolean: 'text-purple-400',
         number: 'text-green-400',
         string: 'text-blue-400',
