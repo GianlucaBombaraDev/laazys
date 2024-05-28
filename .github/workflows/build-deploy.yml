@@ -43,7 +43,7 @@ jobs:
               working-directory: ./packages/laazys
 
             - name: Publish to GitHub Packages
-              run: npm publish
+              run: pnpm publish --filter ./packages/laazys --registry=https://npm.pkg.github.com
               env:
                 NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
