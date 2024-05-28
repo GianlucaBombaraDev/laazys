@@ -9,7 +9,7 @@ export function useFiles() {
         let response
 
         try {
-            response = await axios.get(window.location.origin + '/api/files.json')
+            response = await axios.get(window.location.origin + '/files')
         } catch (error) {
             response = { data: error }
         }

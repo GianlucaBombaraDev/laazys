@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import figlet from 'figlet'
 import chalk from 'chalk'
-import fs from 'fs'
 import yargs from 'yargs/yargs'
 import { hideBin } from 'yargs/helpers'
 import express from 'express'
@@ -41,51 +40,50 @@ async function start() {
     }).argv
 
     // @ts-ignore
-    const filesList = await getDocumentation(argv?.path ? argv.path : './lib')
-
-    console.log(`\nAnalizzati: ${filesList.length} file`)
-
-    const jsonString = JSON.stringify(filesList, null, 2)
-
-    // Write JSON string to a file
-    fs.writeFile('../laazys/app/api/files.json', jsonString, (err) => {
-        if (err) {
-            console.error('Error writing JSON file:', err)
-            return
-        }
-    })
+    console.log(`\nWe are analyzing the files inside: ${chalk.hex('#9CEE8D').bold(`${argv?.path}`)}`)
 
     // @ts-ignore
-    if (argv['open'] !== undefined) {
-        const app = express()
-        const port = 3000
+    const filesList = await getDocumentation(argv?.path ? argv.path : './lib')
 
-        function startServer(port: number) {
-            app.listen(port, () => {
-                console.log(`Server is running at http://localhost:${port}`)
-                open(`http://localhost:${port}`)
-            }).on('error', (err) => {
-                // @ts-ignore
-                if (err.code === 'EADDRINUSE') {
-                    console.warn(`Port ${port} is already in use, trying port ${port + 1}`)
-                    startServer(++port)
-                } else {
-                    console.error(err)
-                }
-            })
-        }
+    console.log(`\nAnalyzed ${chalk.hex('#9CEE8D').bold(`${filesList.length}`)} file`)
 
-        // Serve static files from the "public" directory
-        app.use(express.static(path.join(__dirname, '../../app')))
+    console.log()
 
-        // Route for serving the HTML file
-        // @ts-ignore
-        app.get('/', (req, res) => {
-            res.sendFile(path.join(__dirname, '../../app/index.html'))
+    const app = express()
+    const port = 3000
+
+    function startServer(port: number) {
+        app.listen(port, () => {
+            console.log(`Server is running at ${chalk.hex('#9CEE8D').bold(`http://localhost:${port}`)}`)
+
+            // @ts-ignore
+            if (argv['open'] !== undefined) open(`http://localhost:${port}`)
+        }).on('error', (err) => {
+            // @ts-ignore
+            if (err.code === 'EADDRINUSE') {
+                console.warn(`Port ${port} is already in use, trying port ${port + 1}`)
+                console.log()
+                startServer(++port)
+            } else {
+                console.error(err)
+            }
         })
-
-        startServer(port)
     }
+
+    // Serve static files from the "public" directory
+    app.use(express.static(path.join(__dirname, '../../app')))
+
+    // Route for serving the HTML file
+    // @ts-ignore
+    app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../app/index.html'))
+    })
+
+    app.get('/files', (req, res) => {
+        res.json(filesList)
+    })
+
+    startServer(port)
 }
 
 start().catch((error) => {
