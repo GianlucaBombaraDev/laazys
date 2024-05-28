@@ -17,8 +17,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.21",
-    "@types/figlet": "^1.5.8",
-    "prettier-plugin-vue": "^1.1.6"
+    "@types/figlet": "^1.5.8"
   },
   "dependencies": {
     "open": "^10.1.0",
@@ -27,6 +26,8 @@
     "express": "^4.19.2",
     "figlet": "^1.7.0",
     "vue-docgen-api": "^4.78.0",
-    "yargs": "^17.7.2"
+    "yargs": "^17.7.2",
+    "prettier": "^3.2.5",
+    "prettier-plugin-vue": "^1.1.6"
   }
 }
