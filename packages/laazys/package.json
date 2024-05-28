@@ -26,7 +26,6 @@
     "yargs": "^17.7.2"
   },
   "dependencies": {
-    "@gianlucabombaradev/laazys-app": "workspace:^",
     "open": "^10.1.0",
     "prettier-plugin-vue": "^1.1.6"
   }

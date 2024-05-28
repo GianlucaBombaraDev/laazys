@@ -47,7 +47,7 @@ async function start() {
     const jsonString = JSON.stringify(filesList, null, 2)
 
     // Write JSON string to a file
-    fs.writeFile('../laazys-app/dist/api/files.json', jsonString, (err) => {
+    fs.writeFile('../laazys/app/api/files.json', jsonString, (err) => {
         if (err) {
             console.error('Error writing JSON file:', err)
             return
@@ -55,7 +55,7 @@ async function start() {
     })
 
     // @ts-ignore
-    if (argv?.open) {
+    if (argv['open'] !== undefined) {
         const app = express()
         const port = 3000
 
@@ -75,12 +75,12 @@ async function start() {
         }
 
         // Serve static files from the "public" directory
-        app.use(express.static(path.join(__dirname, '../../../laazys-app/dist')))
+        app.use(express.static(path.join(__dirname, '../../app')))
 
         // Route for serving the HTML file
         // @ts-ignore
         app.get('/', (req, res) => {
-            res.sendFile(path.join(__dirname, '../../../laazys-app/dist/index.html'))
+            res.sendFile(path.join(__dirname, '../../app/index.html'))
         })
 
         startServer(port)

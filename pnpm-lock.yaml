@@ -53,9 +53,6 @@ importers:
 
   packages/laazys:
     dependencies:
-      '@gianlucabombaradev/laazys-app':
-        specifier: workspace:^
-        version: link:../laazys-app
       open:
         specifier: ^10.1.0
         version: 10.1.0
