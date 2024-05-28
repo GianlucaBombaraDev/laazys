@@ -22,8 +22,9 @@ export async function getDocumentation(pathDoc: string) {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
 
+    const processPath = path.join(process.cwd(), pathDoc)
     // @ts-ignore
-    const fileNames = await getAllFiles(path.resolve(__dirname, pathDoc))
+    const fileNames = await getAllFiles(path.resolve(__dirname, processPath))
 
     for (let file of fileNames.paths) {
         try {
