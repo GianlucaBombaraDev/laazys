@@ -79,14 +79,10 @@ async function _generateSourceCode(fileName: string, properties: any) {
 
     const componentCode = `<${fileName} ${componentCodeSection('props')} ${componentCodeSection('events')}${properties?.slots ? `>${componentCodeSection('slots')}</${fileName}>` : '/>'}`
 
-    console.log('componentCode', componentCode)
-
     const formattedCode = await prettier.format(componentCode, {
         parser: 'vue',
         plugins: [parseVue],
     })
-
-    console.log('formattedCode', formattedCode)
 
     return formattedCode
 }
@@ -97,8 +93,6 @@ async function _generateList(docVue: any, fileNames: any, file: any) {
     const fileInfo = extractFileInfo(file)
     const sourceCode =
         fileInfo.extension === 'vue' ? await _generateSourceCode(fileInfo.name, { slots, props, events }) : null
-
-    console.log('sourceCode', sourceCode)
 
     return {
         id: generateRandomHash(),
