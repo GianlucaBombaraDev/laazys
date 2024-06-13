@@ -6,6 +6,9 @@ export default {
             colors: {
                 body: 'rgb(var(--color-body) / <alpha-value>)',
                 bodyText: 'rgb(var(--color-body-text) / <alpha-value>)',
+                bodyGrid: 'rgb(var(--color-body-grid) / <alpha-value>)',
+                sidebar: 'rgb(var(--color-sidebar) / <alpha-value>)',
+
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
                 warning: {
