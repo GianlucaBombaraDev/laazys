@@ -1,36 +1,48 @@
 <script setup lang="ts">
+/**
+ * Manage the switch light/dark mode
+ */
 import { ref } from 'vue'
 import AppIcon from './AppIcon.vue'
 
-const isDarkMode = ref(false)
+const currentTheme = ref('light')
 
-function toggleTheme() {
-    isDarkMode.value = !isDarkMode.value
+/**
+ * Toggle light/dark theme classs to body
+ */
+function toggleTheme(themeKey: string) {
+    currentTheme.value = themeKey
 
-    if (isDarkMode.value) {
+    if (currentTheme.value === 'dark') {
         document.querySelector('body')?.classList.add('dark-theme')
     } else {
         document.querySelector('body')?.classList.remove('dark-theme')
     }
 }
 
-function getClasses(step: number) {
-    const step2Classes = (isDarkMode.value && step === 2) ?? 'bg-accent hover:bg-primary'
-    const step1Classes = (!isDarkMode.value && step === 1) ?? 'bg-accent hover:bg-primary'
-    return step2Classes + ' ' + step1Classes
+const themes: { light: { classes: string }; dark: { classes: string } } = {
+    light: {
+        classes: 'bg-accent hover:bg-primary',
+    },
+    dark: {
+        classes: 'bg-accent hover:bg-primary',
+    },
 }
 </script>
 
 <template>
-    <div class="flex items-center">
+    <div class="flex items-center justify-center">
         <div
-            v-for="theme in 2"
-            :key="theme"
+            v-for="(theme, themeKey) in themes"
+            :key="themeKey"
             class="r-[5px] flex cursor-pointer items-center justify-center rounded-full p-1 first:mr-[5px]"
-            :class="[getClasses(theme)]"
-            @click.prevent="toggleTheme"
+            :class="[themeKey === currentTheme ? theme.classes : '']"
+            @click.prevent="toggleTheme(themeKey)"
         >
-            <AppIcon :name="theme === 1 ? 'sun' : 'moon'" :sizing="{ width: 'w-[20px]', height: 'h-[20px]' }" />
+            <AppIcon
+                :name="themeKey === 'light' ? 'sun' : 'moon'"
+                :sizing="{ width: 'w-[20px]', height: 'h-[20px]' }"
+            />
         </div>
     </div>
 </template>

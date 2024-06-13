@@ -2,7 +2,6 @@
 import { onMounted } from 'vue'
 import laazysLogo from '/laazys-logo.svg'
 import AppSidebar from './components/AppSidebar.vue'
-import AppThemeSwitch from './components/AppThemeSwitch.vue'
 import { useRouter } from 'vue-router'
 import AppFileList from './components/AppFileList.vue'
 import { useFiles } from './composable/useFiles'
@@ -23,19 +22,17 @@ const backToHome = () => router.push('/')
 </script>
 
 <template>
-    <AppSidebar>
-        <div class="item-center flex justify-center">
-            <img :src="laazysLogo" alt="laazys logo" @click.prevent="backToHome" />
-
-            <AppThemeSwitch class="ml-[20px]" />
+    <AppSidebar direction="left" class="w-[300px]">
+        <div class="flex flex-col items-center justify-center">
+            <img :src="laazysLogo" alt="laazys logo" class="w-[200px]" @click.prevent="backToHome" />
         </div>
 
-        <div v-if="files" class="mt-[20px]">
+        <div v-if="files" class="mt-[30px]">
             <AppFileList :files="files" />
         </div>
     </AppSidebar>
 
-    <div v-if="files" class="fixed left-[300px] top-0 h-full w-[calc(100%-300px)] bg-gray-50 p-4">
+    <div v-if="files" class="bg-body fixed left-[300px] top-0 h-full w-[calc(100%-300px)] p-4">
         <router-view></router-view>
     </div>
 </template>

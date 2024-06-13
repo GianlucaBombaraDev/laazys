@@ -16,16 +16,16 @@ withDefaults(defineProps<Props>(), {
 
 <template>
     <div class="flex flex-col">
-        <h2 class="text-xl font-bold">{{ name }}</h2>
+        <h2 class="text-body-text text-xl font-bold">{{ name }}</h2>
         <p class="mt-2 inline-block text-sm">
             {{ path }}
         </p>
-        <p v-if="description && description !== ''" class="mt-2 inline-block">
+        <p v-if="description && description !== ''" class="text-body-text mt-2 inline-block">
             {{ description }}
         </p>
 
         <div v-if="requires" class="mt-2">
-            <span>
+            <span class="text-body-text">
                 Richiede: <strong>{{ requires }}</strong>
             </span>
         </div>

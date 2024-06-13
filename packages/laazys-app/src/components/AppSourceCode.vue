@@ -1,9 +1,13 @@
 $
 <script setup lang="ts">
+/**
+ * Show preview of source code
+ */
 import { onMounted, ref } from 'vue'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import 'highlight.js/styles/default.css'
+import AppCard from './AppCard.vue'
 
 hljs.registerLanguage('javascript', javascript)
 
@@ -27,7 +31,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mt-4 h-[250px] w-full rounded-2xl border bg-white p-4 shadow-sm">
+    <AppCard>
         <pre v-if="componentCodePreview && componentCodePreview !== ''" v-html="componentCodePreview"></pre>
-    </div>
+    </AppCard>
 </template>

@@ -21,7 +21,7 @@ withDefaults(defineProps<Props>(), {
 const fileStore = useFileStore()
 const current_file = fileStore.getCurrentFile()
 
-const mapStatus:{[key:string]: string} = {
+const mapStatus: { [key: string]: string } = {
     deprecated: 'bg-deprecated-bg text-deprecated-text',
     alpha: 'bg-alpha-bg text-aplha-text',
     beta: 'bg-beta-bg text-beta-text',
@@ -31,6 +31,7 @@ const mapStatus:{[key:string]: string} = {
 }
 
 function getStatus(status: string): string {
+    if (!status || status === '') return ''
     let statusKey = status.toLowerCase()
     return mapStatus[statusKey] !== undefined ? mapStatus[statusKey] : ''
 }
@@ -49,17 +50,21 @@ function getStatus(status: string): string {
             >
                 <span class="flex items-center">
                     <span
-                        class="inline-block truncate"
+                        class="text-body-text inline-block truncate"
                         :class="[
                             current_file === item.id ? 'font-semibold' : '',
-                            item?.status.toLowerCase() === 'deprecated' ? 'line-through' : '',
+                            item?.status && item?.status.toLowerCase() === 'deprecated' ? 'italic line-through' : '',
                         ]"
                     >
                         {{ item.name }}
                     </span>
                 </span>
 
-                <span v-if="item?.status" class="ml-[10px] rounded-full p-1 text-xs" :class="[getStatus(item.status)]">
+                <span
+                    v-if="item?.status"
+                    class="ml-[10px] rounded-full px-2 py-1 text-xs font-medium"
+                    :class="[getStatus(item.status)]"
+                >
                     {{ item.status }}
                 </span>
             </router-link>
