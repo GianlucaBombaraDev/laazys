@@ -1,9 +1,19 @@
-export type PropTypes = 'boolean' | 'number' | 'string' | 'object' | 'array' | 'null' | 'undefined' | 'function' | 'symbol' | 'bigint';
+export type PropTypes =
+    | 'boolean'
+    | 'number'
+    | 'string'
+    | 'object'
+    | 'array'
+    | 'null'
+    | 'undefined'
+    | 'function'
+    | 'symbol'
+    | 'bigint'
 
 export type IProp = {
     name: string
     defaultValue?: string
-    type?: {name: PropTypes}
+    type?: { name: PropTypes }
 }
 
 export type File = {
@@ -15,4 +25,17 @@ export type File = {
     events?: IProp[]
     methods?: IProp[]
     sourceCode: string
+}
+
+export type FileBox = {
+    name: string
+    description?: string
+    required?: string
+    properties: IProp[]
+}
+
+export type Properties = {
+    props: IProp[]
+    slots: IProp[]
+    events: IProp[]
 }
