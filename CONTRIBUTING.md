@@ -35,16 +35,17 @@ To try your changes, build the UI first, then the CLI, and run it on the sample 
 (cd packages/laazys && pnpm build && node dist/bin/laazys.js -p ./test -o)
 ```
 
-`packages/laazys/test` contains sample components and composables. If your change affects parsing, add or update a sample there that shows it.
+`packages/laazys/test` contains sample components and composables. If your change affects parsing, add or update a sample there that shows it, and a test fixture in `packages/laazys/__tests__/fixtures/docs`.
 
 ## Before opening a pull request
 
 ```bash
 pnpm lint             # ESLint
 pnpm build:packages   # includes the vue-tsc type check of the UI
+pnpm test:coverage    # Vitest; fails below 100% coverage
 ```
 
-Both must pass: CI runs the same commands on every pull request. Code is formatted with Prettier (`npx prettier --write <files>`), and most editors pick up `.prettierrc` and `.editorconfig` automatically.
+All three must pass: CI runs the same commands on every pull request. Coverage is kept at 100% statements, branches, functions and lines, so every change needs tests. Tests live in `packages/*/__tests__/`. If a branch can't be reached by any test, it's usually dead code and can be removed. To run a single file during development, use `npx vitest run <path>`. Code is formatted with Prettier (`npx prettier --write <files>`), and most editors pick up `.prettierrc` and `.editorconfig` automatically.
 
 Keep pull requests focused on one change, and describe what changed and how you tested it. If you change the shape of the data the CLI sends to the UI, update `packages/laazys-app/src/types/file.type.ts` as well.
 

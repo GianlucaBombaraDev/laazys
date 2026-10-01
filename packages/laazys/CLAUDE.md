@@ -23,6 +23,14 @@ Method shape is the same for both sources: `{ name, description, params, return 
 
 To add a new custom JSDoc tag, use the `add-jsdoc-tag` skill: the change spans the parser, the output object and the UI.
 
+## Tests
+
+`__tests__/` (Node environment):
+- `fixtures/docs/` holds real `.vue`/`.js` files run through vue-docgen. Add a fixture there for new parsing cases, including files that must fail (`Broken.vue`).
+- Folder-walking tests build temporary directories, because a `node_modules` fixture would be gitignored.
+- The server is tested with supertest and port `0`. `cli-defaults.test.ts` mocks the server so nothing binds the real port 3000.
+- `bin/laazys.ts` only calls `run()`. Keep logic out of it: `bin.test.ts` imports it with `run` mocked.
+
 ## Gotchas
 
 - **ESM build:** sources use extensionless relative imports, but the package is `"type": "module"` (`moduleResolution: bundler`). `scripts/tsc-fix.js` appends `.js` to relative imports in `dist/`. Keep imports extensionless and always build with `pnpm build`, never bare `tsc`.
