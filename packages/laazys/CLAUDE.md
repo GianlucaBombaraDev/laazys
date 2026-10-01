@@ -14,8 +14,14 @@ curl -s localhost:3000/files            # inspect the parsed output
 
 ## Architecture
 
-- `bin/laazys.ts` — yargs args, calls `getDocumentation`, then Express 5 (bound to `localhost` only, since `/files` exposes source code) serves `../../app` (relative to `dist/bin/`), `GET /files`, and a `/{*splat}` fallback to `index.html` so SPA routes survive a reload.
-- `utils/get-all-files.ts` — recursive walk. `.vue` files are collected as path + source. `.js` files are fully processed here with `comment-parser`, and only blocks that have a `@method` tag are kept.
+- `bin/laazys.ts` only calls `run()` from `utils/cli.ts`, which handles the yargs options (`--path`, `--open`, `--watch`, `--theme`), parses, then starts the server.
+- `utils/server.ts`:
+    - `DocsState` holds the parsed files. `update()` replaces them and emits `'update'`.
+    - `createApp` serves `GET /files`, `GET /theme.json`, `GET /events` (Server-Sent Events, one `update` event per regeneration), the built SPA, and a `/{*splat}` fallback to `index.html`.
+    - `startServer` binds to `localhost` only, since `/files` exposes source code.
+- `utils/watch.ts` — `fs.watch` (recursive), filtered with `isDocumentable`/`isIgnoredDir` from `get-all-files.ts` and debounced. In watch mode the CLI re-runs `getDocumentation` and calls `state.update()`.
+- `utils/theme.ts` — validates the `--theme` JSON (modes `light`/`dark`, tokens in `THEME_TOKENS`, hex colors) and converts the colors to `"R G B"` triplets. Keep `THEME_TOKENS` in sync with the `--color-*` variables in `laazys-app/src/index.css`.
+- `utils/get-all-files.ts` — recursive walk. `.vue` files are collected as path + source. `.js`/`.ts` files (not `.d.ts`) are fully processed here with `comment-parser`: only blocks with a `@method` tag are kept, and files without any are dropped.
 - `utils/get-documentations.ts` — runs each `.vue` file through `vue-docgen-api`. A custom script handler (`_parseList`) scans every JSDoc block for the tags in `tagToParser`. It also builds the usage snippet `sourceCode` from props/events/slots with Prettier's built-in `vue` parser.
 - `utils/doc-parser.ts` — regex parsers for the custom tags.
 
@@ -29,6 +35,8 @@ To add a new custom JSDoc tag, use the `add-jsdoc-tag` skill: the change spans t
 - `fixtures/docs/` holds real `.vue`/`.js` files run through vue-docgen. Add a fixture there for new parsing cases, including files that must fail (`Broken.vue`).
 - Folder-walking tests build temporary directories, because a `node_modules` fixture would be gitignored.
 - The server is tested with supertest and port `0`. `cli-defaults.test.ts` mocks the server so nothing binds the real port 3000.
+- Open SSE connections keep `server.close()` waiting: call `server.closeAllConnections()` first.
+- `watch.test.ts` captures the `fs.watch` callback to drive exact file names, plus one real-filesystem test. `cli-watch.test.ts` mocks the watcher and the parser.
 - `bin/laazys.ts` only calls `run()`. Keep logic out of it: `bin.test.ts` imports it with `run` mocked.
 
 ## Gotchas
