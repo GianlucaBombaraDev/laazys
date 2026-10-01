@@ -1,5 +1,6 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { createPinia } from 'pinia'
+import { createPinia, setActivePinia } from 'pinia'
+import { useFileStore } from '../src/store/file.store'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from '../src/App.vue'
 import AppFileList from '../src/components/AppFileList.vue'
@@ -14,6 +15,7 @@ const files = [
 const api = vi.hoisted(() => ({
     getFiles: vi.fn(),
     getTheme: vi.fn(),
+    getPreviewStatus: vi.fn(),
     onFilesUpdate: vi.fn(),
     stopUpdates: vi.fn(),
     onUpdate: () => {},
@@ -23,6 +25,7 @@ vi.mock('../src/composable/useFiles', () => ({
     useFiles: () => ({
         getFiles: api.getFiles,
         getTheme: api.getTheme,
+        getPreviewStatus: api.getPreviewStatus,
         getIcons: async () => ({}),
         onFilesUpdate: api.onFilesUpdate,
     }),
@@ -36,15 +39,18 @@ afterEach(() => {
 async function mountApp(path = '/file/a') {
     api.getFiles.mockResolvedValue(files)
     api.getTheme.mockResolvedValue({ dark: { primary: '1 2 3' } })
+    api.getPreviewStatus.mockResolvedValue({ enabled: true })
     api.onFilesUpdate.mockImplementation((callback) => {
         api.onUpdate = callback
         return api.stopUpdates
     })
     const router = createTestRouter()
     await router.push(path)
-    const wrapper = mount(App, { global: { plugins: [router, createPinia()] } })
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    const wrapper = mount(App, { global: { plugins: [router, pinia] } })
     await flushPromises()
-    return { wrapper, router }
+    return { wrapper, router, store: useFileStore() }
 }
 
 const listedNames = (wrapper: any) =>
@@ -57,6 +63,7 @@ describe('App', () => {
     it('shows nothing until the files are loaded', () => {
         api.getFiles.mockReturnValue(new Promise(() => {}))
         api.getTheme.mockResolvedValue({})
+        api.getPreviewStatus.mockResolvedValue({ enabled: false, reason: '' })
         api.onFilesUpdate.mockReturnValue(() => {})
         const wrapper = mount(App, { global: { plugins: [createTestRouter(), createPinia()] } })
 
@@ -89,14 +96,21 @@ describe('App', () => {
         expect(wrapper.text()).toContain('Nessun risultato per “zzz”.')
     })
 
-    it('reloads the files when the CLI regenerates them', async () => {
-        const { wrapper } = await mountApp()
+    it('stores the preview status', async () => {
+        const { store } = await mountApp()
+
+        expect(store.preview).toEqual({ enabled: true })
+    })
+
+    it('reloads the files and bumps the revision when the CLI regenerates them', async () => {
+        const { wrapper, store } = await mountApp()
         api.getFiles.mockResolvedValue([files[0]])
 
         api.onUpdate()
         await flushPromises()
 
         expect(listedNames(wrapper)).toEqual(['Button'])
+        expect(store.revision).toBe(1)
     })
 
     it('stops listening for updates when unmounted', async () => {

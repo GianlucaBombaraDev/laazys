@@ -5,6 +5,8 @@ import File from '../src/pages/File.vue'
 import AppFileHeader from '../src/components/AppFileHeader.vue'
 import AppFileProperties from '../src/components/AppFileProperties.vue'
 import AppSourceCode from '../src/components/AppSourceCode.vue'
+import AppComponentPreview from '../src/components/AppComponentPreview.vue'
+import AppFigma from '../src/components/AppFigma.vue'
 import { useFileStore } from '../src/store/file.store'
 import { createTestRouter } from './helpers'
 
@@ -19,19 +21,24 @@ const files = [
         slots: [{ name: 'default' }],
         events: [{ name: 'update' }],
         methods: [{ name: 'open' }],
+        figma: 'https://www.figma.com/design/abc/Full',
     },
     { id: 'bare', name: 'Bare', path: '/src/Bare.vue', extension: 'vue' },
+    { id: 'composable', name: 'useCounter', path: '/src/useCounter.ts', extension: 'ts' },
 ]
 
 async function mountAt(path: string) {
     const pinia = createPinia()
     setActivePinia(pinia)
-    useFileStore().files = files
+    const store = useFileStore()
+    store.files = files
+    store.preview = { enabled: true }
+    store.revision = 2
     const router = createTestRouter()
     await router.push(path)
     const wrapper = mount(File, { global: { plugins: [router, pinia] } })
     await flushPromises()
-    return { wrapper, router }
+    return { wrapper, router, store }
 }
 
 beforeEach(() => {
@@ -73,5 +80,37 @@ describe('File page', () => {
         const { wrapper } = await mountAt('/file/missing')
 
         expect(wrapper.findComponent(AppFileHeader).exists()).toBe(false)
+    })
+
+    it('previews components with the store status and revision', async () => {
+        const { wrapper } = await mountAt('/file/full')
+
+        expect(wrapper.findComponent(AppComponentPreview).props()).toEqual({
+            fileId: 'full',
+            status: { enabled: true },
+            revision: 2,
+        })
+    })
+
+    it('does not preview composables', async () => {
+        const { wrapper } = await mountAt('/file/composable')
+
+        expect(wrapper.findComponent(AppComponentPreview).exists()).toBe(false)
+    })
+
+    it('shows the Figma design only when the file links one', async () => {
+        expect((await mountAt('/file/full')).wrapper.findComponent(AppFigma).props('url')).toBe(
+            'https://www.figma.com/design/abc/Full',
+        )
+        expect((await mountAt('/file/bare')).wrapper.findComponent(AppFigma).exists()).toBe(false)
+    })
+
+    it('follows a watch-mode reload of the files', async () => {
+        const { wrapper, store } = await mountAt('/file/bare')
+
+        store.files = [{ ...files[1], name: 'Renamed' }]
+        await flushPromises()
+
+        expect(wrapper.findComponent(AppFileHeader).props('name')).toBe('Renamed')
     })
 })

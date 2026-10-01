@@ -45,6 +45,19 @@ export function useFiles() {
         return response.data
     }
 
+    async function getPreviewStatus() {
+        let response
+
+        try {
+            response = await axios.get('/preview.json')
+        } catch (error) {
+            console.error('Error loading the preview status:', error)
+            response = { data: { enabled: false, reason: 'the server did not answer' } }
+        }
+
+        return response.data
+    }
+
     /**
      * Call `callback` whenever the CLI regenerates the docs (`laazys --watch`).
      * Returns a function that stops listening.
@@ -59,6 +72,7 @@ export function useFiles() {
         getFiles,
         getIcons,
         getTheme,
+        getPreviewStatus,
         onFilesUpdate,
     }
 }

@@ -6,6 +6,8 @@ export default defineProject({
     test: {
         name: 'laazys-app',
         environment: 'happy-dom',
+        // Never load iframe pages (component preview, Figma embed): tests must not hit the network
+        environmentOptions: { happyDOM: { settings: { disableIframePageLoading: true } } },
         include: ['__tests__/**/*.test.ts'],
     },
 })

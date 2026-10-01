@@ -68,4 +68,21 @@ describe('useFiles', () => {
         expect(callback).toHaveBeenCalledTimes(1)
         expect(source.close).toHaveBeenCalled()
     })
+
+    it('fetches the preview status', async () => {
+        vi.mocked(axios.get).mockResolvedValue({ data: { enabled: true } })
+
+        await expect(useFiles().getPreviewStatus()).resolves.toEqual({ enabled: true })
+        expect(axios.get).toHaveBeenCalledWith('/preview.json')
+    })
+
+    it('reports the preview as unavailable when the status cannot be loaded', async () => {
+        vi.mocked(axios.get).mockRejectedValue(new Error('offline'))
+        vi.spyOn(console, 'error').mockImplementation(() => {})
+
+        await expect(useFiles().getPreviewStatus()).resolves.toEqual({
+            enabled: false,
+            reason: 'the server did not answer',
+        })
+    })
 })

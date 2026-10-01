@@ -22,4 +22,5 @@ export type File = {
     events?: IProp[]
     methods?: IProp[]
     sourceCode?: string
+    figma?: string
 }

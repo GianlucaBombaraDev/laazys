@@ -15,9 +15,9 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const router = useRouter()
-const { getFiles, getTheme, onFilesUpdate } = useFiles()
+const { getFiles, getTheme, getPreviewStatus, onFilesUpdate } = useFiles()
 const fileStore = useFileStore()
-const { files } = storeToRefs(fileStore)
+const { files, preview, revision } = storeToRefs(fileStore)
 
 const query = ref('')
 // Only read inside v-if="files", so the list is always loaded here
@@ -33,12 +33,14 @@ watch(
 // With `laazys --watch` the CLI pushes an event after each regeneration
 const stopUpdates = onFilesUpdate(async () => {
     files.value = await getFiles()
+    revision.value++
 })
 onUnmounted(stopUpdates)
 
 onMounted(async () => {
-    const [loadedFiles, theme] = await Promise.all([getFiles(), getTheme()])
+    const [loadedFiles, theme, previewStatus] = await Promise.all([getFiles(), getTheme(), getPreviewStatus()])
     applyCustomTheme(theme)
+    preview.value = previewStatus
     files.value = loadedFiles
 })
 

@@ -18,4 +18,11 @@ describe('file store', () => {
         expect(store.getCurrentFile('b')).toEqual({ id: 'b' })
         expect(store.getCurrentFile('missing')).toBeNull()
     })
+
+    it('starts with the preview off and no regeneration', () => {
+        const store = useFileStore()
+
+        expect(store.preview).toEqual({ enabled: false, reason: '' })
+        expect(store.revision).toBe(0)
+    })
 })
