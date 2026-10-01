@@ -1,0 +1,36 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: [bug]
+body:
+    - type: textarea
+      id: what-happened
+      attributes:
+          label: What happened?
+          description: What did you expect, and what happened instead?
+      validations:
+          required: true
+    - type: textarea
+      id: sample
+      attributes:
+          label: Sample file
+          description: A minimal `.vue` or `.js` file that reproduces the problem. Remove anything private.
+          render: vue
+    - type: input
+      id: command
+      attributes:
+          label: Command
+          placeholder: npx laazys -p ./src
+    - type: input
+      id: versions
+      attributes:
+          label: Versions
+          description: Laazys version, Node.js version (`node -v`) and operating system
+          placeholder: laazys 0.1.0-alpha.1, Node 24.1.0, Ubuntu 24.04
+      validations:
+          required: true
+    - type: textarea
+      id: logs
+      attributes:
+          label: Terminal output
+          description: Any error printed by the CLI
+          render: shell
