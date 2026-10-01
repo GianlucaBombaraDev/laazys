@@ -32,6 +32,8 @@ What you get:
 - **Composables in JavaScript and TypeScript:** `@method` blocks in `.js` and `.ts` files are documented with their params and return values.
 - **Search:** filter the sidebar by name, description, props, events, slots or methods.
 - **Overview and analysis:** the home page counts components and composables, groups components by status, and lists deprecated components, components without a description and methods without a description.
+- **Live component preview:** each component is rendered, read-only, with your project's own Vite setup (see [Component preview](#component-preview)).
+- **Figma links:** link a component to its design with `@figma` and open or embed it from the docs.
 - **Status badges:** components marked `deprecated`, `alpha`, `beta`, `preAlpha`, `inProgress` or `ready` are tagged in the sidebar.
 - **Watch mode:** with `--watch`, the docs are regenerated when a file changes and open pages refresh by themselves.
 - **Light and dark themes:** follows the system preference, remembers your choice, and the colors can be customized with `--theme`.
@@ -79,6 +81,8 @@ pnpm exec laazys --path ./src --open
 | `--open` | `-o` | no | Open the documentation in the browser once the server starts. |
 | `--watch` | `-w` | no | Regenerate the docs when a `.vue`, `.js` or `.ts` file changes. Open pages update without a reload. |
 | `--theme` | `-t` | no | JSON file with custom colors, see [Custom theme](#custom-theme). |
+| `--no-preview` | | no | Don't render the component previews. |
+| `--preview-setup` | | no | Module that prepares the Vue app of each preview, see [Component preview](#component-preview). |
 
 You can also add it to the `scripts` of your `package.json` and run it with `npm run docs` or `pnpm run docs`. Use `run`: `npm docs` and `pnpm docs` are built-in commands that open a package's homepage.
 
@@ -115,6 +119,30 @@ Pass a JSON file with `--theme` to change the colors of the light theme, the dar
 
 The file is validated at startup: an unknown color, mode or a value that isn't a hex color stops the command with an error that names it.
 
+### Component preview
+
+Every component page shows a read-only rendering of the component. Laazys starts **your project's Vite** with your `vite.config` (aliases, plugins, CSS), so components look the same as in your app. Each preview runs in its own frame: an error in one component shows up in its frame without affecting the rest.
+
+Requirements: Vite and Vue installed in the project, plus a `vite.config` file or `@vitejs/plugin-vue`. When they're missing, the page explains why and the rest of the docs works as usual. Use `--no-preview` to skip it.
+
+- **Props:** required props without a default get a placeholder of their type (the prop name for strings, `0`, `false`, `[]`, `{}`). Pass realistic values with `@previewProps` (see [Supported tags](#supported-tags)).
+- **Slots:** each documented slot shows a dashed box with its name.
+- **Plugins and global CSS:** components that need a router, a store, i18n or global styles can get them from a setup module, passed with `--preview-setup`:
+
+```js
+// laazys.preview.js
+import { createPinia } from 'pinia'
+import './src/assets/main.css'
+
+export default (app) => {
+    app.use(createPinia())
+}
+```
+
+```bash
+npx laazys --path ./src --preview-setup ./laazys.preview.js
+```
+
 ## Supported tags
 
 ### Components (`.vue`)
@@ -128,6 +156,8 @@ import { provide, reactive } from 'vue'
  * across multiple lines if needed.
  * @status beta
  * @requires FormProvider.vue
+ * @figma https://www.figma.com/design/AbC123/Forms?node-id=12-34
+ * @previewProps {"disabled": false}
  */
 
 defineProps({ disabled: { type: Boolean, default: false } })
@@ -157,6 +187,8 @@ provide('form', formState)
 | `@requires` | "Requires" note in the component header |
 | `@method` + `@param` / `@returns` | Entry in the component's methods |
 | `@provide` | What the component provides. Included in the parsed data, not shown in the UI yet |
+| `@figma` | Link to the design, with an "Open in Figma" button and an embed loaded on demand. Only `https://` links on `figma.com` are accepted |
+| `@previewProps` | Props for the [component preview](#component-preview), as a JSON object on one line |
 
 Props, events and slots don't need any tag: they are read from `defineProps`, `defineEmits` and the template.
 

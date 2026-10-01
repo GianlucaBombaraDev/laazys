@@ -20,12 +20,18 @@ curl -s localhost:3000/files            # inspect the parsed output
     - `createApp` serves `GET /files`, `GET /theme.json`, `GET /events` (Server-Sent Events, one `update` event per regeneration), the built SPA, and a `/{*splat}` fallback to `index.html`.
     - `startServer` binds to `localhost` only, since `/files` exposes source code.
 - `utils/watch.ts` — `fs.watch` (recursive), filtered with `isDocumentable`/`isIgnoredDir` from `get-all-files.ts` and debounced. In watch mode the CLI re-runs `getDocumentation` and calls `state.update()`.
+- `utils/preview.ts` — component preview:
+    - Finds the documented project (closest `package.json`) and its own Vite in `node_modules`, walking up. It never uses Laazys' own Vite.
+    - Starts Vite in middleware mode under `PREVIEW_BASE` with the project's `vite.config` (or `@vitejs/plugin-vue` when there is none), plus `previewPlugin`, which provides the `virtual:laazys-preview` mount module.
+    - `previewHtml` builds the page for one component. `previewProps` adds placeholders for required props, and `@previewProps` overrides them.
+    - The server mounts the Vite middleware and `/__laazys_preview/render/:id`. `/preview.json` says whether the preview is on, or why not.
+    - Any failure disables the preview with a reason; it must never stop the CLI.
 - `utils/theme.ts` — validates the `--theme` JSON (modes `light`/`dark`, tokens in `THEME_TOKENS`, hex colors) and converts the colors to `"R G B"` triplets. Keep `THEME_TOKENS` in sync with the `--color-*` variables in `laazys-app/src/index.css`.
 - `utils/get-all-files.ts` — recursive walk. `.vue` files are collected as path + source. `.js`/`.ts` files (not `.d.ts`) are fully processed here with `comment-parser`: only blocks with a `@method` tag are kept, and files without any are dropped.
 - `utils/get-documentations.ts` — runs each `.vue` file through `vue-docgen-api`. A custom script handler (`_parseList`) scans every JSDoc block for the tags in `tagToParser`. It also builds the usage snippet `sourceCode` from props/events/slots with Prettier's built-in `vue` parser.
 - `utils/doc-parser.ts` — regex parsers for the custom tags.
 
-Method shape is the same for both sources: `{ name, description, params, return }`. In Vue files, `@method` blocks are collected as `customMethods` and merged with vue-docgen's own `methods`. `id`s come from `generateRandomHash()` and change on every run.
+Method shape is the same for both sources: `{ name, description, params, return }`. In Vue files, `@method` blocks are collected as `customMethods` and merged with vue-docgen's own `methods`. `id`s come from `fileId()`, a hash of the file path, so they stay the same across watch-mode regenerations.
 
 To add a new custom JSDoc tag, use the `add-jsdoc-tag` skill: the change spans the parser, the output object and the UI.
 
@@ -36,6 +42,7 @@ To add a new custom JSDoc tag, use the `add-jsdoc-tag` skill: the change spans t
 - Folder-walking tests build temporary directories, because a `node_modules` fixture would be gitignored.
 - The server is tested with supertest and port `0`. `cli-defaults.test.ts` mocks the server so nothing binds the real port 3000.
 - Open SSE connections keep `server.close()` waiting: call `server.closeAllConnections()` first.
+- `preview.test.ts` uses fake `vite`/`@vitejs/plugin-vue` packages in temp dirs. `preview-vite.test.ts` runs the real Vite on `fixtures/preview-project`. The other CLI tests pass `--no-preview`, or mock `../utils/preview`, so they don't start Vite.
 - `watch.test.ts` captures the `fs.watch` callback to drive exact file names, plus one real-filesystem test. `cli-watch.test.ts` mocks the watcher and the parser.
 - `bin/laazys.ts` only calls `run()`. Keep logic out of it: `bin.test.ts` imports it with `run` mocked.
 

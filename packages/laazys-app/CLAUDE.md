@@ -16,6 +16,7 @@ pnpm dev     # Vite dev server; /files is fetched from the same origin, so data 
 `__tests__/` (happy-dom + @vue/test-utils):
 - Use `createTestRouter()` from `__tests__/helpers.ts` (real router, memory history, same route names) and a real Pinia. Mock only `axios` or `useFiles`.
 - `main.test.ts` boots the real entry point at `/` and `/file/:id` to cover both lazy routes.
+- `vitest.config.ts` sets happy-dom's `disableIframePageLoading`: without it, mounting a preview or Figma iframe makes real network requests.
 - `EventSource` is replaced with `FakeEventSource` from `helpers.ts` (`vi.stubGlobal`). Use `.emit('update')` to simulate the CLI.
 
 ## Architecture
@@ -29,6 +30,9 @@ pnpm dev     # Vite dev server; /files is fetched from the same origin, so data 
 - `src/composable/useFiles.ts` — fetches `/files` and `/icons.json`. Use absolute paths: relative URLs resolve under `/file/` on nested routes. On error it returns an empty value, never the error object.
 - `src/store/file.store.js` (Pinia 4) — `files` and `getCurrentFile(id)`. The selected file comes from `route.params.id`.
 - `src/types/file.type.ts` — the file shape emitted by the CLI. Keep it in sync with `_generateList` in `../laazys/utils/get-documentations.ts`.
+- File page:
+    - `AppComponentPreview` loads `/__laazys_preview/render/:id?revision=N` in an inert, read-only iframe. The frame's height comes from `postMessage` (`laazys-preview-size`), accepted only from its own window. `revision` is bumped on watch-mode reloads so the frame refreshes.
+    - `AppFigma` shows `@figma` links only if `utils/figma.ts` accepts them (https on figma.com). The embed loads on demand.
 - `@status` values are lowercased before lookup in `AppList.vue`'s `mapStatus`, so its keys must be lowercase.
 
 ## Theming
