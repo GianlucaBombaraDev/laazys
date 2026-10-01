@@ -3,6 +3,7 @@
     "singleQuote": true,
     "tabWidth": 4,
     "printWidth": 120,
+    "tailwindStylesheet": "./packages/laazys-app/src/index.css",
     "plugins": [
         "prettier-plugin-tailwindcss"
     ]
