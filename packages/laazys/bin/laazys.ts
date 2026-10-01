@@ -53,20 +53,24 @@ async function start() {
     const port = 3000
 
     function startServer(port: number) {
-        app.listen(port, () => {
+        // Bind to localhost only: /files exposes the project's source code.
+        // Express 5 passes listen errors (e.g. EADDRINUSE) to the callback.
+        app.listen(port, 'localhost', (err?: NodeJS.ErrnoException) => {
+            if (err) {
+                if (err.code === 'EADDRINUSE') {
+                    console.warn(`Port ${port} is already in use, trying port ${port + 1}`)
+                    console.log()
+                    startServer(port + 1)
+                } else {
+                    console.error(err)
+                }
+                return
+            }
+
             console.log(`Server is running at ${chalk.hex('#9CEE8D').bold(`http://localhost:${port}`)}`)
 
             // @ts-ignore
             if (argv['open'] !== undefined) open(`http://localhost:${port}`)
-        }).on('error', (err) => {
-            // @ts-ignore
-            if (err.code === 'EADDRINUSE') {
-                console.warn(`Port ${port} is already in use, trying port ${port + 1}`)
-                console.log()
-                startServer(++port)
-            } else {
-                console.error(err)
-            }
         })
     }
 
@@ -81,6 +85,11 @@ async function start() {
 
     app.get('/files', (req, res) => {
         res.json(filesList)
+    })
+
+    // History-mode fallback so client routes like /file/:id survive a page reload
+    app.get('/{*splat}', (req, res) => {
+        res.sendFile(path.join(__dirname, '../../app/index.html'))
     })
 
     startServer(port)

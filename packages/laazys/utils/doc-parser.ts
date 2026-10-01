@@ -12,11 +12,11 @@ export const parseDescription = (text: string) => _matchTag(_parseMultiLine('des
 export const parseMethod = (text: string) => {
     const methodMatch = text.match(/@method\s+([^\n\r]+)\s*/)
     const descriptionMatch = text.match(/@method[^\n\r]+\n\s*\*\s*([^\n\r@]+)\s*/)
-    const paramMatches = [...text.matchAll(/@param\s+\{([^\}]+)\}\s+(\w+)\s+-\s+([^\n\r]+)/g)]
+    const paramMatches = [...text.matchAll(/@param\s+\{([^}]+)\}\s+(\w+)\s+-\s+([^\n\r]+)/g)]
     // Adjusted to ensure it captures scenarios where the description might follow different newline conventions
-    const returnMatch = [...text.matchAll(/@return\s+\{([^\}]+)\}\s+(\w+)\s+-\s+([^\n\r]+)/g)]
+    const returnMatch = [...text.matchAll(/@returns?\s+\{([^}]+)\}[ \t]*([^\n\r]*)/g)]
 
-    let documentation: any = {
+    const documentation: any = {
         name: methodMatch ? methodMatch[1].trim() : null,
         description: descriptionMatch ? descriptionMatch[1].trim().replace(/ *\r?\n *\* */g, ' ') : '',
         params: [],
@@ -31,12 +31,10 @@ export const parseMethod = (text: string) => {
     }))
 
     // Parsing return
-    if (returnMatch) {
-        documentation.return = returnMatch.map((match) => ({
-            type: match[1],
-            description: match[3].trim(),
-        }))
-    }
+    documentation.return = returnMatch.map((match) => ({
+        type: match[1],
+        description: match[2].replace(/^-\s*/, '').trim(),
+    }))
 
     return documentation
 }

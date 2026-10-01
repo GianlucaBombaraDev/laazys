@@ -2,11 +2,8 @@
 import { getAllFiles, extractFileInfo, generateRandomHash } from './get-all-files'
 import path from 'path'
 import vueDocs from 'vue-docgen-api'
-import { fileURLToPath } from 'url'
 import { parseDescription, parseRequires, parseStatus, parseProvide, parseMethod } from './doc-parser'
 import prettier from 'prettier'
-// @ts-ignore
-import parseVue from 'prettier-plugin-vue' // Required for HTML formatting
 
 const tagToParser = {
     '@requires': parseRequires,
@@ -17,22 +14,18 @@ const tagToParser = {
 }
 
 export async function getDocumentation(pathDoc: string) {
-    let list = []
+    const list = []
 
-    const __filename = fileURLToPath(import.meta.url)
-    const __dirname = path.dirname(__filename)
-
-    const processPath = path.join(process.cwd(), pathDoc)
     // @ts-ignore
-    const fileNames = await getAllFiles(path.resolve(__dirname, processPath))
+    const fileNames = await getAllFiles(path.resolve(process.cwd(), pathDoc))
 
-    for (let file of fileNames.paths) {
+    for (const file of fileNames.paths) {
         try {
             const docVue = await vueDocs
                 .parse(file, {
                     // @ts-ignore
                     addScriptHandlers: [
-                        (documentation, componentDefinition, astPath, opt) => _parseList(astPath, documentation),
+                        (documentation, componentDefinition, astPath) => _parseList(astPath, documentation),
                     ],
                 })
                 .then((ci) => ci)
@@ -49,27 +42,31 @@ export async function getDocumentation(pathDoc: string) {
 
 function _parseList(astPath: any, documentation: any) {
     const componentDoc = astPath.tokens.filter((token: any) => token.type === 'CommentBlock')
-    if (componentDoc) {
-        componentDoc.forEach((cmp: any) => {
-            // Iterate over each tag-parser pair in the mapping
-            Object.entries(tagToParser).forEach(([tag, parser]) => {
-                // Check if the component value includes the tag and act accordingly
-                if (cmp.value.includes(tag)) {
-                    // Extract the key from the tag (e.g., '@requires' => 'requires')
-                    const key = tag.substring(1) // Removes the '@' at the beginning
-                    documentation.set(key, parser(cmp.value))
-                }
-            })
+    // A component can document several methods, so they are collected instead of overwritten
+    const customMethods: any[] = []
+
+    componentDoc.forEach((cmp: any) => {
+        // Iterate over each tag-parser pair in the mapping
+        Object.entries(tagToParser).forEach(([tag, parser]) => {
+            // Check if the component value includes the tag and act accordingly
+            if (cmp.value.includes(tag)) {
+                // Extract the key from the tag (e.g., '@requires' => 'requires')
+                const key = tag.substring(1) // Removes the '@' at the beginning
+                if (key === 'method') customMethods.push(parser(cmp.value))
+                else documentation.set(key, parser(cmp.value))
+            }
         })
-    }
+    })
+
+    if (customMethods.length) documentation.set('customMethods', customMethods)
 }
 
 async function _generateSourceCode(fileName: string, properties: any) {
-    if (!properties.props && !properties.slots && !properties.event) return
+    if (!properties.props?.length && !properties.slots?.length && !properties.events?.length) return
 
     const componentCodeSection = (type: string) => {
         let response = ``
-        properties[type].forEach((prop: any) => {
+        ;(properties[type] || []).forEach((prop: any) => {
             if (type === 'slots') response += `<slot name="${prop.name}"></slot>`
             if (type === 'props') response += `:${prop.name}=""`
             if (type === 'events') response += `@${prop.name}="() => {}"`
@@ -78,18 +75,16 @@ async function _generateSourceCode(fileName: string, properties: any) {
         return response
     }
 
-    const componentCode = `<${fileName} ${componentCodeSection('props')} ${componentCodeSection('events')}${properties?.slots ? `>${componentCodeSection('slots')}</${fileName}>` : '/>'}`
+    const componentCode = `<${fileName} ${componentCodeSection('props')} ${componentCodeSection('events')}${properties.slots?.length ? `>${componentCodeSection('slots')}</${fileName}>` : '/>'}`
 
-    const formattedCode = await prettier.format(componentCode, {
-        parser: 'vue',
-        plugins: [parseVue],
-    })
+    // The vue parser is built into Prettier 3
+    const formattedCode = await prettier.format(componentCode, { parser: 'vue' })
 
     return formattedCode
 }
 
 async function _generateList(docVue: any, fileNames: any, file: any) {
-    const { tags, description, requires, status, props, events, slots, methods, provide } = docVue
+    const { tags, description, requires, status, props, events, slots, methods, customMethods, provide } = docVue
     const fileCode = fileNames.files.find((fileItem: any) => fileItem.path === file)?.file
     const fileInfo = extractFileInfo(file)
     const sourceCode =
@@ -109,7 +104,7 @@ async function _generateList(docVue: any, fileNames: any, file: any) {
         props,
         events,
         slots,
-        methods,
+        methods: methods || customMethods ? [...(methods || []), ...(customMethods || [])] : undefined,
         provide,
     }
 }
