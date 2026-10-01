@@ -2,13 +2,20 @@ import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 import pluginVue from 'eslint-plugin-vue'
-import pluginJest from 'eslint-plugin-jest'
+import vitest from '@vitest/eslint-plugin'
 import prettier from 'eslint-config-prettier/flat'
 
 export default tseslint.config(
     {
         // test/ holds sample files to document, not real code
-        ignores: ['**/node_modules/', '**/dist/', 'packages/laazys/app/', 'packages/laazys/test/'],
+        ignores: [
+            '**/node_modules/',
+            '**/dist/',
+            '**/coverage/',
+            'packages/laazys/app/',
+            'packages/laazys/test/',
+            '**/__tests__/fixtures/',
+        ],
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,
@@ -31,8 +38,9 @@ export default tseslint.config(
         },
     },
     {
-        files: ['**/__tests__/**', '**/*.test.ts'],
-        ...pluginJest.configs['flat/recommended'],
+        files: ['**/__tests__/**/*.ts'],
+        plugins: { vitest },
+        rules: vitest.configs.recommended.rules,
     },
     prettier,
 )
