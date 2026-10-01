@@ -5,6 +5,7 @@ node_modules/
 dist/
 packages/laazys/app/
 coverage/
+.vitest/
 
 # Logs
 *.log

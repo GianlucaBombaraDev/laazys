@@ -4,8 +4,3 @@ packages:
 # pnpm >= 11 no longer reads these from .npmrc
 shamefullyHoist: true
 strictPeerDependencies: false
-
-# Both ship prebuilt binaries, their install scripts are only a fallback
-allowBuilds:
-  '@parcel/watcher': false
-  unrs-resolver: false

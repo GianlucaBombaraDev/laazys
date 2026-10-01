@@ -20,6 +20,8 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-vue": "^6.0.9",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^20.14.5",
     "highlight.js": "^11.12.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
