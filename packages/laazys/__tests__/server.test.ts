@@ -58,7 +58,9 @@ describe('createApp extras', () => {
         expect((await request(createApp(new DocsState(files), appDir)).get('/theme.json')).body).toEqual({})
 
         const theme = { dark: { primary: '1 2 3' } }
-        expect((await request(createApp(new DocsState(files), appDir, theme)).get('/theme.json')).body).toEqual(theme)
+        expect((await request(createApp(new DocsState(files), appDir, { theme })).get('/theme.json')).body).toEqual(
+            theme,
+        )
     })
 
     it('serves the latest files after an update', async () => {
@@ -87,6 +89,64 @@ describe('createApp extras', () => {
 
         controller.abort()
         await vi.waitFor(() => expect(state.listenerCount('update')).toBe(0))
+    })
+})
+
+describe('component preview routes', () => {
+    const vueFile = { id: 'abc', name: 'Button', extension: 'vue', path: '/p/Button.vue' }
+    const jsFile = { id: 'js', name: 'useX', extension: 'js', path: '/p/useX.js' }
+
+    // Stand-in for the Vite dev server: echoes the HTML and serves one module
+    const fakeVite = () => ({
+        enabled: true as const,
+        server: {
+            transformIndexHtml: vi.fn(async (url: string, html: string) => `<!-- ${url} -->${html}`),
+            middlewares: (req: any, res: any, next: () => void) =>
+                req.url === '/__laazys_preview/module.js' ? res.end('export default 1') : next(),
+            close: vi.fn(),
+        },
+    })
+
+    it('reports a disabled preview by default', async () => {
+        const response = await request(createApp(new DocsState(files), appDir)).get('/preview.json')
+
+        expect(response.body).toEqual({ enabled: false, reason: 'Preview disabled' })
+    })
+
+    it('reports why the preview is disabled', async () => {
+        const preview = { enabled: false as const, reason: 'Vite is not installed in the project' }
+        const response = await request(createApp(new DocsState(files), appDir, { preview })).get('/preview.json')
+
+        expect(response.body).toEqual(preview)
+    })
+
+    it('renders the preview page of a component through Vite', async () => {
+        const preview = fakeVite()
+        const app = createApp(new DocsState([vueFile, jsFile]), appDir, { preview })
+
+        expect((await request(app).get('/preview.json')).body).toEqual({ enabled: true })
+
+        const page = await request(app).get('/__laazys_preview/render/abc')
+        expect(page.type).toBe('text/html')
+        expect(page.text).toContain('<!-- /__laazys_preview/render/abc -->')
+        expect(page.text).toContain("import Component from '/@fs/p/Button.vue'")
+    })
+
+    it.each(['missing', 'js'])('answers 404 for "%s", which is not a component', async (id) => {
+        const app = createApp(new DocsState([vueFile, jsFile]), appDir, { preview: fakeVite() })
+
+        const response = await request(app).get(`/__laazys_preview/render/${id}`)
+
+        expect(response.status).toBe(404)
+        expect(response.text).toBe('Unknown component')
+    })
+
+    it("serves the project's modules through the Vite middleware", async () => {
+        const app = createApp(new DocsState(files), appDir, { preview: fakeVite() })
+
+        expect((await request(app).get('/__laazys_preview/module.js')).text).toBe('export default 1')
+        // Everything else still reaches the SPA
+        expect((await request(app).get('/file/abc')).text).toBe('<html>app</html>')
     })
 })
 

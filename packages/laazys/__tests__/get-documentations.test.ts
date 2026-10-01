@@ -1,6 +1,7 @@
 import path from 'path'
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { getDocumentation } from '../utils/get-documentations'
+import { fileId } from '../utils/get-all-files'
 
 const FIXTURES = path.join(__dirname, 'fixtures', 'docs')
 
@@ -60,12 +61,15 @@ describe('getDocumentation', () => {
             status: 'Beta',
             requires: 'Parent.vue',
             provide: 'panel|open',
+            figma: 'https://www.figma.com/design/abc123/Panel?node-id=1-2',
+            previewProps: { isActive: true },
             props: [{ name: 'isActive', type: { name: 'boolean' } }],
             events: [{ name: 'update' }],
             slots: [{ name: 'default' }],
         })
         expect(full.code).toContain('defineProps')
-        expect(full.id).toMatch(/^[0-9a-f]+$/)
+        // Same id on every run, so watch-mode regenerations keep open pages valid
+        expect(full.id).toBe(fileId(path.join(FIXTURES, 'Full.vue')))
     })
 
     it('keeps every @method block of a component', () => {

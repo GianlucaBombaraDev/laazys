@@ -6,6 +6,8 @@ import { provide } from 'vue'
  * supported tag, on two lines.
  * @status Beta
  * @requires Parent.vue
+ * @figma https://www.figma.com/design/abc123/Panel?node-id=1-2
+ * @previewProps {"isActive": true}
  */
 
 defineProps({

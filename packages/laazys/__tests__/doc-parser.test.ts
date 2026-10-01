@@ -1,5 +1,13 @@
-import { describe, expect, it } from 'vitest'
-import { parseDescription, parseMethod, parseProvide, parseRequires, parseStatus } from '../utils/doc-parser'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import {
+    parseDescription,
+    parseFigma,
+    parseMethod,
+    parsePreviewProps,
+    parseProvide,
+    parseRequires,
+    parseStatus,
+} from '../utils/doc-parser'
 
 describe('single-line tags', () => {
     it('reads the value up to the end of the line', () => {
@@ -61,5 +69,37 @@ describe('parseMethod', () => {
             params: [{ name: 'x', type: 'string', description: 'unused' }],
             return: [],
         })
+    })
+})
+
+describe('parseFigma', () => {
+    it('reads the design link', () => {
+        expect(parseFigma('* @figma https://www.figma.com/design/abc/Panel?node-id=1-2\n')).toBe(
+            'https://www.figma.com/design/abc/Panel?node-id=1-2',
+        )
+    })
+})
+
+describe('parsePreviewProps', () => {
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+
+    it('parses a JSON object', () => {
+        expect(parsePreviewProps('* @previewProps {"label": "Save", "count": 2}\n')).toEqual({
+            label: 'Save',
+            count: 2,
+        })
+    })
+
+    it.each([
+        ['invalid JSON', '* @previewProps {label: Save}', '@previewProps is not valid JSON: {label: Save}'],
+        ['an array', '* @previewProps [1, 2]', '@previewProps must be a JSON object, got: [1, 2]'],
+        ['null', '* @previewProps null', '@previewProps must be a JSON object, got: null'],
+    ])('warns and ignores %s', (label, comment, warning) => {
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+        expect(parsePreviewProps(comment)).toBeNull()
+        expect(warn).toHaveBeenCalledWith(warning)
     })
 })

@@ -4,6 +4,8 @@ import type { Server } from 'http'
 import type { AddressInfo } from 'net'
 import { EventEmitter } from 'events'
 import path from 'path'
+import { PREVIEW_BASE, previewHtml } from './preview'
+import type { Preview } from './preview'
 
 /** The parsed documentation, replaceable at runtime (watch mode) */
 export class DocsState extends EventEmitter {
@@ -17,7 +19,11 @@ export class DocsState extends EventEmitter {
     }
 }
 
-export function createApp(state: DocsState, appDir: string, theme: object = {}) {
+type AppOptions = { theme?: object; preview?: Preview }
+
+const NO_PREVIEW: Preview = { enabled: false, reason: 'Preview disabled' }
+
+export function createApp(state: DocsState, appDir: string, { theme = {}, preview = NO_PREVIEW }: AppOptions = {}) {
     const app = express()
 
     app.get('/files', (req, res) => {
@@ -37,6 +43,25 @@ export function createApp(state: DocsState, appDir: string, theme: object = {}) 
         state.on('update', notify)
         req.on('close', () => state.off('update', notify))
     })
+
+    app.get('/preview.json', (req, res) => {
+        res.json(preview.enabled ? { enabled: true } : preview)
+    })
+
+    if (preview.enabled) {
+        // Page rendering one component, loaded by the UI in an iframe
+        app.get(`${PREVIEW_BASE}render/:id`, async (req, res) => {
+            const file = state.files.find((item) => item.id === req.params.id && item.extension === 'vue')
+            if (!file) {
+                res.status(404).send('Unknown component')
+                return
+            }
+            res.type('html').send(await preview.server.transformIndexHtml(req.originalUrl, previewHtml(file)))
+        })
+
+        // Modules, CSS and assets of the project, compiled by its own Vite
+        app.use(preview.server.middlewares)
+    }
 
     // Serve the built SPA (packages/laazys-app is built into appDir)
     app.use(express.static(appDir))

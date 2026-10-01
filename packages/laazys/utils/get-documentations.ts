@@ -1,8 +1,16 @@
 // @ts-ignore
-import { getAllFiles, extractFileInfo, generateRandomHash } from './get-all-files'
+import { getAllFiles, extractFileInfo, fileId } from './get-all-files'
 import path from 'path'
 import vueDocs from 'vue-docgen-api'
-import { parseDescription, parseRequires, parseStatus, parseProvide, parseMethod } from './doc-parser'
+import {
+    parseDescription,
+    parseFigma,
+    parseMethod,
+    parsePreviewProps,
+    parseProvide,
+    parseRequires,
+    parseStatus,
+} from './doc-parser'
 import prettier from 'prettier'
 
 const tagToParser = {
@@ -11,6 +19,8 @@ const tagToParser = {
     '@description': parseDescription,
     '@method': parseMethod,
     '@provide': parseProvide,
+    '@figma': parseFigma,
+    '@previewProps': parsePreviewProps,
 }
 
 export async function getDocumentation(pathDoc: string) {
@@ -82,14 +92,27 @@ async function _generateSourceCode(fileName: string, properties: any) {
 }
 
 async function _generateList(docVue: any, fileNames: any, file: any) {
-    const { tags, description, requires, status, props, events, slots, methods, customMethods, provide } = docVue
+    const {
+        tags,
+        description,
+        requires,
+        status,
+        props,
+        events,
+        slots,
+        methods,
+        customMethods,
+        provide,
+        figma,
+        previewProps,
+    } = docVue
     // fileNames.files holds every .vue path, so the lookup always succeeds
     const fileCode = fileNames.files.find((fileItem: any) => fileItem.path === file).file
     const fileInfo = extractFileInfo(file)
     const sourceCode = await _generateSourceCode(fileInfo.name, { slots, props, events })
 
     return {
-        id: generateRandomHash(),
+        id: fileId(file),
         sourceCode: sourceCode,
         path: file,
         name: fileInfo.name,
@@ -104,5 +127,7 @@ async function _generateList(docVue: any, fileNames: any, file: any) {
         slots,
         methods: methods || customMethods ? [...(methods || []), ...(customMethods || [])] : undefined,
         provide,
+        figma,
+        previewProps,
     }
 }

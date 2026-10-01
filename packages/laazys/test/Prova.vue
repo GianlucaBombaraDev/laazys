@@ -1,4 +1,5 @@
 <script setup>
+import { provide } from 'vue'
 import { useProva } from './useProva'
 /**
  * @description sono la descrizione del file vue, anche

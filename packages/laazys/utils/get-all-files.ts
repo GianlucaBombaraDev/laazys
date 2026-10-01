@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { parse } from 'comment-parser'
+import { createHash } from 'crypto'
 
 const IGNORED_DIRS = ['node_modules', 'dist']
 const SCRIPT_EXTENSIONS = ['.js', '.ts']
@@ -41,7 +42,7 @@ export const getAllFiles = function (
 
                 const fileInfo = extractFileInfo(filePath)
                 arrayOfJsFile.push({
-                    id: generateRandomHash(),
+                    id: fileId(filePath),
                     path: filePath,
                     name: fileInfo.name,
                     extension: fileInfo.extension,
@@ -89,13 +90,10 @@ export function extractFileInfo(filePath: string) {
     return { name, extension: ext.replace(/^\./, '') }
 }
 
-export function generateRandomHash() {
-    const seed = new Date().getTime().toString() + Math.random().toString()
-    let hash = 0
-    for (let i = 0; i < seed.length; i++) {
-        const char = seed.charCodeAt(i)
-        hash = (hash << 5) - hash + char
-        hash = hash & hash // Convert to 32bit integer
-    }
-    return Math.abs(hash).toString(16)
+/**
+ * Stable id derived from the file path: it survives watch-mode regenerations,
+ * so open pages (/file/:id) keep pointing at the same file.
+ */
+export function fileId(filePath: string) {
+    return createHash('sha1').update(filePath).digest('hex').slice(0, 12)
 }

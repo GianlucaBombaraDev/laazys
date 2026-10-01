@@ -39,3 +39,17 @@ export const parseMethod = (text: string) => {
     return documentation
 }
 export const parseProvide = (text: string) => _matchTag(_parseSingleLine('provide'), text)
+export const parseFigma = (text: string) => _matchTag(_parseSingleLine('figma'), text)
+
+/** `@previewProps {"label": "Save"}`: props used to render the component preview */
+export const parsePreviewProps = (text: string) => {
+    const json = _matchTag(_parseSingleLine('previewProps'), text)
+    try {
+        const props = JSON.parse(json as string)
+        if (typeof props === 'object' && props !== null && !Array.isArray(props)) return props
+        console.warn(`@previewProps must be a JSON object, got: ${json}`)
+    } catch {
+        console.warn(`@previewProps is not valid JSON: ${json}`)
+    }
+    return null
+}

@@ -33,13 +33,13 @@ const filesOf = async (server: Server) => {
 
 describe('run --watch', () => {
     it('does not watch without the flag', async () => {
-        server = await run(['-p', 'src'], { appDir: '.', port: 0 })
+        server = await run(['-p', 'src', '--no-preview'], { appDir: '.', port: 0 })
 
         expect(watchFolder).not.toHaveBeenCalled()
     })
 
     it('watches the resolved folder and serves the regenerated docs', async () => {
-        server = await run(['-p', 'src', '--watch'], { appDir: '.', port: 0 })
+        server = await run(['-p', 'src', '--no-preview', '--watch'], { appDir: '.', port: 0 })
 
         expect(watchFolder).toHaveBeenCalledWith(`${process.cwd()}/src`, expect.any(Function))
         expect(await filesOf(server)).toEqual([{ id: 'a' }])
@@ -53,7 +53,7 @@ describe('run --watch', () => {
 
     it('keeps the last docs when regenerating fails', async () => {
         const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
-        server = await run(['-p', 'src', '-w'], { appDir: '.', port: 0 })
+        server = await run(['-p', 'src', '--no-preview', '-w'], { appDir: '.', port: 0 })
         const error = new Error('folder removed')
         vi.mocked(getDocumentation).mockRejectedValue(error)
 
@@ -64,7 +64,7 @@ describe('run --watch', () => {
     })
 
     it('stops watching when the server closes', async () => {
-        server = await run(['-p', 'src', '-w'], { appDir: '.', port: 0 })
+        server = await run(['-p', 'src', '--no-preview', '-w'], { appDir: '.', port: 0 })
 
         await new Promise((resolve) => server.close(resolve))
 

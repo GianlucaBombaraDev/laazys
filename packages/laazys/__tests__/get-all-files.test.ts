@@ -2,7 +2,7 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { extractFileInfo, generateRandomHash, getAllFiles, isDocumentable, isIgnoredDir } from '../utils/get-all-files'
+import { extractFileInfo, fileId, getAllFiles, isDocumentable, isIgnoredDir } from '../utils/get-all-files'
 
 let root: string
 
@@ -96,8 +96,16 @@ describe('extractFileInfo', () => {
     })
 })
 
-describe('generateRandomHash', () => {
-    it('returns a hexadecimal string', () => {
-        expect(generateRandomHash()).toMatch(/^[0-9a-f]+$/)
+describe('fileId', () => {
+    it('is a short hex id, stable for the same path and different across paths', () => {
+        expect(fileId('/src/Button.vue')).toMatch(/^[0-9a-f]{12}$/)
+        expect(fileId('/src/Button.vue')).toBe(fileId('/src/Button.vue'))
+        expect(fileId('/src/Button.vue')).not.toBe(fileId('/src/Card.vue'))
+    })
+
+    it('identifies composables by their path', () => {
+        const composable = getAllFiles(root).js.find((file: any) => file.name === 'useCard')
+
+        expect(composable.id).toBe(fileId(path.join(root, 'nested', 'useCard.js')))
     })
 })

@@ -8,6 +8,7 @@ import { getDocumentation } from './get-documentations'
 import { DocsState, createApp, startServer } from './server'
 import { loadTheme } from './theme'
 import { watchFolder } from './watch'
+import { createPreview } from './preview'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -54,6 +55,15 @@ export async function run(args: string[], { appDir = DEFAULT_APP_DIR, port = DEF
                 describe: 'JSON file with custom colors for the light and dark themes',
                 type: 'string',
             },
+            preview: {
+                describe: "Render components with the project's Vite (--no-preview to disable)",
+                type: 'boolean',
+                default: true,
+            },
+            'preview-setup': {
+                describe: 'Module whose default export receives the Vue app of each preview (plugins, CSS)',
+                type: 'string',
+            },
         })
         .parseAsync()
 
@@ -67,7 +77,13 @@ export async function run(args: string[], { appDir = DEFAULT_APP_DIR, port = DEF
     console.log(`\nAnalyzed ${highlight(state.files.length)} file`)
     console.log()
 
-    const { server, port: actualPort } = await startServer(createApp(state, appDir, theme), port)
+    const preview = argv.preview
+        ? await createPreview(argv.path, argv['preview-setup'])
+        : ({ enabled: false, reason: 'Disabled with --no-preview' } as const)
+    if (!preview.enabled) console.log(`Component preview off: ${preview.reason}`)
+
+    const { server, port: actualPort } = await startServer(createApp(state, appDir, { theme, preview }), port)
+    if (preview.enabled) server.on('close', () => preview.server.close())
     const url = `http://localhost:${actualPort}`
 
     console.log(`Server is running at ${highlight(url)}`)
