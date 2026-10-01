@@ -5,7 +5,7 @@ import AppList from './AppList.vue'
 type File = {
     extension: string
     name: string
-    id:string
+    id: string
     status: string
 }
 

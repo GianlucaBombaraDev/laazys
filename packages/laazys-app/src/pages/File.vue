@@ -6,7 +6,7 @@ import AppFileProperties from '../components/AppFileProperties.vue'
 import { useFileStore } from '../store/file.store'
 import { useRoute } from 'vue-router'
 import { watch, ref, onMounted } from 'vue'
-import {File} from '../types/file.type'
+import { File } from '../types/file.type'
 
 const route = useRoute()
 
@@ -32,8 +32,8 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="fixed left-[300px] top-0 grid h-full w-[calc(100%-300px)] grid-cols-3 gap-4 bg-gray-50 p-4">
-        <AppFileHeader v-bind="current_file" />
+    <div class="fixed top-0 left-[300px] grid h-full w-[calc(100%-300px)] grid-cols-3 gap-4 bg-gray-50 p-4">
+        <AppFileHeader v-if="current_file" v-bind="current_file" />
 
         <div class="col-span-2 bg-white px-4">
             <div class="mt-4 flex flex-col gap-y-2">

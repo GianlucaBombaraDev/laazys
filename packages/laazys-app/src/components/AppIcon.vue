@@ -14,11 +14,10 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     name: 'add',
-    sizing: {
-        // @ts-ignore
+    sizing: () => ({
         width: 'w-[24px]',
         height: 'h-[24px]',
-    },
+    }),
 })
 
 const { getIcons } = useFiles()
@@ -43,5 +42,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div v-if="svgContent" v-html="svgContent" :class="[sizing.height, sizing.width]"></div>
+    <div v-if="svgContent" :class="[sizing.height, sizing.width]" v-html="svgContent"></div>
 </template>

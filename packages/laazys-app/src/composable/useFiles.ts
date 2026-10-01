@@ -11,7 +11,8 @@ export function useFiles() {
         try {
             response = await axios.get(window.location.origin + '/files')
         } catch (error) {
-            response = { data: error }
+            console.error('Error loading files:', error)
+            response = { data: [] }
         }
 
         return response.data
@@ -21,9 +22,11 @@ export function useFiles() {
         let response
 
         try {
-            response = await axios.get('icons.json')
+            // Absolute path, otherwise it resolves to /file/icons.json on nested routes
+            response = await axios.get('/icons.json')
         } catch (error) {
-            response = { data: error }
+            console.error('Error loading icons:', error)
+            response = { data: {} }
         }
 
         return response.data
