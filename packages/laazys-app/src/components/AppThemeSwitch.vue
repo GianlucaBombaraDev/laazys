@@ -15,9 +15,8 @@ function toggleTheme() {
 }
 
 function getClasses(step: number) {
-    const step2Classes = (isDarkMode.value && step === 2) ?? 'bg-accent hover:bg-primary'
-    const step1Classes = (!isDarkMode.value && step === 1) ?? 'bg-accent hover:bg-primary'
-    return step2Classes + ' ' + step1Classes
+    const isActive = (isDarkMode.value && step === 2) || (!isDarkMode.value && step === 1)
+    return isActive ? 'bg-accent hover:bg-primary' : ''
 }
 </script>
 

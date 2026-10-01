@@ -35,7 +35,7 @@ const backToHome = () => router.push('/')
         </div>
     </AppSidebar>
 
-    <div v-if="files" class="fixed left-[300px] top-0 h-full w-[calc(100%-300px)] bg-gray-50 p-4">
+    <div v-if="files" class="fixed top-0 left-[300px] h-full w-[calc(100%-300px)] bg-gray-50 p-4">
         <router-view></router-view>
     </div>
 </template>

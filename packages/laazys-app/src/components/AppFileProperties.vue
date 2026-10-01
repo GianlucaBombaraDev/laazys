@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import {IProp} from '../types/file.type'
+import { IProp } from '../types/file.type'
 
 defineProps<{
-    properties: IProp[], 
-    label:string
+    properties: IProp[]
+    label: string
 }>()
 
 function getTypeColor(type: string) {
-    const typeMap:{[key:string]: string} = {
+    const typeMap: { [key: string]: string } = {
         boolean: 'text-purple-400',
         number: 'text-green-400',
         string: 'text-blue-400',
@@ -29,6 +29,6 @@ function getTypeColor(type: string) {
         <span v-if="prop?.type?.name" class="font-medium" :class="[getTypeColor(prop.type.name)]">{{
             prop.type.name
         }}</span>
-        <span>{{ prop?.defaultValue }}</span>
+        <span>{{ prop?.defaultValue?.value }}</span>
     </div>
 </template>

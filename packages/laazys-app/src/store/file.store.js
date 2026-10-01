@@ -5,7 +5,7 @@ export const useFileStore = defineStore('fileStore', () => {
     const files = ref(null)
     const current_file = ref(null)
 
-    const getCurrentFile = (id) => files.value.filter((file) => file.id === id)[0]
+    const getCurrentFile = (id) => files.value?.find((file) => file.id === id) ?? null
 
     return {
         current_file,

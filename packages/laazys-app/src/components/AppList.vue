@@ -1,6 +1,6 @@
 <script setup lang="ts">
 //@ts-ignore
-import { useFileStore } from '../store/file.store'
+import { useRoute } from 'vue-router'
 
 type Item = {
     id: string
@@ -18,15 +18,15 @@ withDefaults(defineProps<Props>(), {
     items: () => [],
 })
 
-const fileStore = useFileStore()
-const current_file = fileStore.getCurrentFile()
+const route = useRoute()
 
-const mapStatus:{[key:string]: string} = {
+// Keys are lowercase because getStatus lowercases the @status value
+const mapStatus: { [key: string]: string } = {
     deprecated: 'bg-deprecated-bg text-deprecated-text',
-    alpha: 'bg-alpha-bg text-aplha-text',
+    alpha: 'bg-alpha-bg text-alpha-text',
     beta: 'bg-beta-bg text-beta-text',
-    preAlpha: 'bg-preAlpha-bg text-preAlpha-text',
-    inProgress: 'bg-warning-bg text-warning-text',
+    prealpha: 'bg-preAlpha-bg text-preAlpha-text',
+    inprogress: 'bg-warning-bg text-warning-text',
     ready: 'bg-success-bg text-success-text',
 }
 
@@ -51,8 +51,8 @@ function getStatus(status: string): string {
                     <span
                         class="inline-block truncate"
                         :class="[
-                            current_file === item.id ? 'font-semibold' : '',
-                            item?.status.toLowerCase() === 'deprecated' ? 'line-through' : '',
+                            route.params.id === item.id ? 'font-semibold' : '',
+                            item.status?.toLowerCase() === 'deprecated' ? 'line-through' : '',
                         ]"
                     >
                         {{ item.name }}
