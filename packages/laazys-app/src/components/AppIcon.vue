@@ -22,16 +22,10 @@ const props = withDefaults(defineProps<Props>(), {
 
 const { getIcons } = useFiles()
 
+// getIcons never throws: on failure it returns {} and the icon is simply not rendered
 const loadSVG = async () => {
-    try {
-        // @ts-ignore
-        const json = await getIcons()
-        // @ts-ignore
-        return json[props.name]
-    } catch (error) {
-        console.error('Error loading SVG:', error)
-        return null
-    }
+    const json = await getIcons()
+    return json[props.name] ?? null
 }
 
 const svgContent = ref(null)

@@ -12,10 +12,6 @@ export const getAllFiles = function (
 ) {
     const files = fs.readdirSync(dirPath)
 
-    arrayOfFiles = arrayOfFiles || []
-    arrayOfCodeFile = arrayOfCodeFile || []
-    arrayOfJsFile = arrayOfJsFile || []
-
     files.forEach(function (file) {
         if (fs.statSync(dirPath + '/' + file).isDirectory()) {
             if (IGNORED_DIRS.includes(file) || file.startsWith('.')) return
