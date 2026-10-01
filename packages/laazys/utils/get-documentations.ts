@@ -21,14 +21,12 @@ export async function getDocumentation(pathDoc: string) {
 
     for (const file of fileNames.paths) {
         try {
-            const docVue = await vueDocs
-                .parse(file, {
-                    // @ts-ignore
-                    addScriptHandlers: [
-                        (documentation, componentDefinition, astPath) => _parseList(astPath, documentation),
-                    ],
-                })
-                .then((ci) => ci)
+            const docVue = await vueDocs.parse(file, {
+                // @ts-ignore
+                addScriptHandlers: [
+                    (documentation, componentDefinition, astPath) => _parseList(astPath, documentation),
+                ],
+            })
             list.push(await _generateList(docVue, fileNames, file))
         } catch (error) {
             console.error(error)
@@ -85,10 +83,10 @@ async function _generateSourceCode(fileName: string, properties: any) {
 
 async function _generateList(docVue: any, fileNames: any, file: any) {
     const { tags, description, requires, status, props, events, slots, methods, customMethods, provide } = docVue
-    const fileCode = fileNames.files.find((fileItem: any) => fileItem.path === file)?.file
+    // fileNames.files holds every .vue path, so the lookup always succeeds
+    const fileCode = fileNames.files.find((fileItem: any) => fileItem.path === file).file
     const fileInfo = extractFileInfo(file)
-    const sourceCode =
-        fileInfo.extension === 'vue' ? await _generateSourceCode(fileInfo.name, { slots, props, events }) : null
+    const sourceCode = await _generateSourceCode(fileInfo.name, { slots, props, events })
 
     return {
         id: generateRandomHash(),

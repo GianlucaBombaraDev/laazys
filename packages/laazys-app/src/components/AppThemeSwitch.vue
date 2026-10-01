@@ -7,11 +7,7 @@ const isDarkMode = ref(false)
 function toggleTheme() {
     isDarkMode.value = !isDarkMode.value
 
-    if (isDarkMode.value) {
-        document.querySelector('body')?.classList.add('dark-theme')
-    } else {
-        document.querySelector('body')?.classList.remove('dark-theme')
-    }
+    document.body.classList.toggle('dark-theme', isDarkMode.value)
 }
 
 function getClasses(step: number) {
