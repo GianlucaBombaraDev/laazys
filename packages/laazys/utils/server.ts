@@ -2,17 +2,44 @@ import express from 'express'
 import type { Express } from 'express'
 import type { Server } from 'http'
 import type { AddressInfo } from 'net'
+import { EventEmitter } from 'events'
 import path from 'path'
 
-export function createApp(filesList: any[], appDir: string) {
+/** The parsed documentation, replaceable at runtime (watch mode) */
+export class DocsState extends EventEmitter {
+    constructor(public files: any[]) {
+        super()
+    }
+
+    update(files: any[]) {
+        this.files = files
+        this.emit('update')
+    }
+}
+
+export function createApp(state: DocsState, appDir: string, theme: object = {}) {
     const app = express()
+
+    app.get('/files', (req, res) => {
+        res.json(state.files)
+    })
+
+    app.get('/theme.json', (req, res) => {
+        res.json(theme)
+    })
+
+    // Server-Sent Events: tells the open pages to reload /files after a change
+    app.get('/events', (req, res) => {
+        res.set({ 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' })
+        res.flushHeaders()
+
+        const notify = () => res.write('event: update\ndata: {}\n\n')
+        state.on('update', notify)
+        req.on('close', () => state.off('update', notify))
+    })
 
     // Serve the built SPA (packages/laazys-app is built into appDir)
     app.use(express.static(appDir))
-
-    app.get('/files', (req, res) => {
-        res.json(filesList)
-    })
 
     // History-mode fallback so client routes like /file/:id survive a page reload
     app.get('/{*splat}', (req, res) => {

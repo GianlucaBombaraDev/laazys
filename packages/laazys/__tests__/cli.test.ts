@@ -41,6 +41,23 @@ describe('run', () => {
         expect(open).not.toHaveBeenCalled()
     })
 
+    it('serves the theme passed with --theme', async () => {
+        const themeFile = path.join(FIXTURES, '..', 'theme.json')
+        server = await run(['-p', FIXTURES, '--theme', themeFile], { appDir: FIXTURES, port: 0 })
+
+        const { port } = server.address() as { port: number }
+        const theme = await (await fetch(`http://localhost:${port}/theme.json`)).json()
+
+        expect(theme).toEqual({ dark: { primary: '255 0 0' } })
+    })
+
+    it('fails before parsing when the theme is invalid', async () => {
+        await expect(
+            run(['-p', FIXTURES, '-t', path.join(FIXTURES, 'Full.vue')], { appDir: FIXTURES, port: 0 }),
+        ).rejects.toThrow(SyntaxError)
+        expect(logs()).not.toContain('We are analyzing')
+    })
+
     it('opens the browser with -o', async () => {
         server = await run(['-p', FIXTURES, '-o'], { appDir: FIXTURES, port: 0 })
 

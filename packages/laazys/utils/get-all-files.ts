@@ -3,6 +3,13 @@ import path from 'path'
 import { parse } from 'comment-parser'
 
 const IGNORED_DIRS = ['node_modules', 'dist']
+const SCRIPT_EXTENSIONS = ['.js', '.ts']
+
+export const isIgnoredDir = (name: string) => IGNORED_DIRS.includes(name) || name.startsWith('.')
+
+// .vue components and .js/.ts composables; type declarations have nothing to document
+export const isDocumentable = (filePath: string) =>
+    ['.vue', ...SCRIPT_EXTENSIONS].includes(path.extname(filePath)) && !filePath.endsWith('.d.ts')
 
 export const getAllFiles = function (
     dirPath: string,
@@ -14,7 +21,7 @@ export const getAllFiles = function (
 
     files.forEach(function (file) {
         if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-            if (IGNORED_DIRS.includes(file) || file.startsWith('.')) return
+            if (isIgnoredDir(file)) return
 
             // The arrays are filled in place by the recursive call
             getAllFiles(dirPath + '/' + file, arrayOfFiles, arrayOfCodeFile, arrayOfJsFile)
@@ -25,10 +32,13 @@ export const getAllFiles = function (
                 arrayOfCodeFile.push({ path: path.join(dirPath, '/', file), file: fileContent })
             }
 
-            if (path.extname(file) === '.js') {
+            if (SCRIPT_EXTENSIONS.includes(path.extname(file)) && isDocumentable(file)) {
                 const filePath = path.join(dirPath, '/', file)
                 const fileContent = fs.readFileSync(filePath, { encoding: 'utf8' })
-                const CommentParser = parse(fileContent)
+                const methods = _parseCommentParser(parse(fileContent))
+                // Plain modules (types, constants, helpers) would only add noise to the list
+                if (!methods.length) return
+
                 const fileInfo = extractFileInfo(filePath)
                 arrayOfJsFile.push({
                     id: generateRandomHash(),
@@ -36,7 +46,7 @@ export const getAllFiles = function (
                     name: fileInfo.name,
                     extension: fileInfo.extension,
                     code: fileContent,
-                    methods: _parseCommentParser(CommentParser),
+                    methods,
                 })
             }
         }

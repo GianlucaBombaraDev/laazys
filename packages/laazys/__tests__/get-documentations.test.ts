@@ -29,13 +29,18 @@ describe('getDocumentation', () => {
             'OnlySlots',
             'PublicMethod',
             'useThing',
+            'useTyped',
         ])
         // Broken.vue is reported, not fatal
         expect(parseErrors).toHaveLength(1)
     })
 
     it('lists components before composables', () => {
-        expect(list.at(-1).extension).toBe('js')
+        const extensions = list.map((file) => file.extension)
+        const firstComposable = extensions.findIndex((extension) => extension !== 'vue')
+
+        expect(extensions.slice(0, firstComposable).every((extension) => extension === 'vue')).toBe(true)
+        expect(extensions.slice(firstComposable).sort()).toEqual(['js', 'ts'])
     })
 
     it('accepts an absolute path', async () => {
@@ -102,5 +107,14 @@ describe('getDocumentation', () => {
             },
             { name: 'helper', description: '', params: [], return: [{ type: 'string', description: '' }] },
         ])
+    })
+
+    it('documents TypeScript composables and skips declarations and plain modules', () => {
+        expect(byName('useTyped')).toMatchObject({
+            extension: 'ts',
+            methods: [{ name: 'useTyped', params: [{ name: 'label', type: 'string' }], return: [{ type: 'number' }] }],
+        })
+        expect(byName('types')).toBeUndefined()
+        expect(byName('constants')).toBeUndefined()
     })
 })

@@ -2,7 +2,7 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { extractFileInfo, generateRandomHash, getAllFiles } from '../utils/get-all-files'
+import { extractFileInfo, generateRandomHash, getAllFiles, isDocumentable, isIgnoredDir } from '../utils/get-all-files'
 
 let root: string
 
@@ -17,6 +17,9 @@ beforeAll(() => {
     write('Button.vue', '<template><button /></template>')
     write('nested/deep/Card.vue', '<template><div /></template>')
     write('nested/useCard.js', '/**\n * @method useCard\n */\nexport function useCard() {}\n')
+    write('nested/useTyped.ts', '/**\n * @method useTyped\n */\nexport function useTyped(): void {}\n')
+    write('nested/plain.js', 'export const SIZE = 3\n')
+    write('nested/types.d.ts', '/**\n * @method declared\n */\nexport declare function declared(): void\n')
     write('notes.md', '# not documented')
     write('node_modules/lib/Ignored.vue', '<template />')
     write('dist/Ignored.vue', '<template />')
@@ -39,11 +42,18 @@ describe('getAllFiles', () => {
             '<template><button /></template>',
             '<template><div /></template>',
         ])
-        expect(result.js).toHaveLength(1)
+        // plain.js has no @method block and types.d.ts is a declaration file
+        expect(result.js.map((file: any) => file.name).sort()).toEqual(['useCard', 'useTyped'])
+    })
+
+    it('documents TypeScript composables like JavaScript ones', () => {
+        const typed = getAllFiles(root).js.find((file: any) => file.name === 'useTyped')
+
+        expect(typed).toMatchObject({ extension: 'ts', methods: [{ name: 'useTyped' }] })
     })
 
     it('documents the @method blocks of .js files', () => {
-        const [composable] = getAllFiles(root).js
+        const composable = getAllFiles(root).js.find((file: any) => file.name === 'useCard')
 
         expect(composable).toMatchObject({
             path: path.join(root, 'nested', 'useCard.js'),
@@ -52,6 +62,27 @@ describe('getAllFiles', () => {
             methods: [{ name: 'useCard', description: '', params: [], return: [] }],
         })
         expect(composable.id).toMatch(/^[0-9a-f]+$/)
+    })
+})
+
+describe('file filters', () => {
+    it.each([
+        ['Button.vue', true],
+        ['useCard.js', true],
+        ['useCard.ts', true],
+        ['types.d.ts', false],
+        ['styles.css', false],
+    ])('isDocumentable(%s) is %s', (file, expected) => {
+        expect(isDocumentable(file)).toBe(expected)
+    })
+
+    it.each([
+        ['node_modules', true],
+        ['dist', true],
+        ['.git', true],
+        ['components', false],
+    ])('isIgnoredDir(%s) is %s', (dir, expected) => {
+        expect(isIgnoredDir(dir)).toBe(expected)
     })
 })
 
