@@ -2,13 +2,15 @@ import fs from 'fs'
 import path from 'path'
 import { parse } from 'comment-parser'
 
+const IGNORED_DIRS = ['node_modules', 'dist']
+
 export const getAllFiles = function (
     dirPath: string,
     arrayOfFiles: any = [],
     arrayOfCodeFile: any = [],
     arrayOfJsFile: any = [],
 ) {
-    let files = fs.readdirSync(dirPath)
+    const files = fs.readdirSync(dirPath)
 
     arrayOfFiles = arrayOfFiles || []
     arrayOfCodeFile = arrayOfCodeFile || []
@@ -16,7 +18,10 @@ export const getAllFiles = function (
 
     files.forEach(function (file) {
         if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-            arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles, arrayOfCodeFile, arrayOfJsFile)
+            if (IGNORED_DIRS.includes(file) || file.startsWith('.')) return
+
+            // The arrays are filled in place by the recursive call
+            getAllFiles(dirPath + '/' + file, arrayOfFiles, arrayOfCodeFile, arrayOfJsFile)
         } else {
             if (path.extname(file) === '.vue') {
                 arrayOfFiles.push(path.join(dirPath, '/', file))
@@ -44,33 +49,38 @@ export const getAllFiles = function (
     return { paths: arrayOfFiles, files: arrayOfCodeFile, js: arrayOfJsFile }
 }
 
+// Map comment-parser blocks to the same shape produced by parseMethod for Vue files
 function _parseCommentParser(fileContent: any) {
-    let response = [...fileContent]
+    const _cleanDescription = (description: string) => description.replace(/^-\s*/, '').trim()
 
-    response = response.map((method) => ({
-        description: method.description,
-        tags:
-            method?.tags &&
-            method?.tags.map((tagItem: any) => ({
-                tag: tagItem.tag,
-                name: tagItem.name,
-                description: tagItem.description,
-                type: tagItem.type,
-            })),
-    }))
+    return [...fileContent]
+        .filter((block: any) => block?.tags?.some((tagItem: any) => tagItem.tag === 'method'))
+        .map((block: any) => {
+            const methodTag = block.tags.find((tagItem: any) => tagItem.tag === 'method')
+            const returnTags = block.tags.filter((tagItem: any) => ['return', 'returns'].includes(tagItem.tag))
 
-    return response
+            return {
+                name: methodTag.name,
+                description: [block.description, methodTag.description].filter(Boolean).join(' ').trim(),
+                params: block.tags
+                    .filter((tagItem: any) => tagItem.tag === 'param')
+                    .map((tagItem: any) => ({
+                        name: tagItem.name,
+                        type: tagItem.type,
+                        description: _cleanDescription(tagItem.description),
+                    })),
+                return: returnTags.map((tagItem: any) => ({
+                    type: tagItem.type,
+                    description: [tagItem.name, tagItem.description].filter(Boolean).join(' ').trim(),
+                })),
+            }
+        })
 }
 
-export function extractFileInfo(path: string) {
-    // Split the path by backslashes to get the parts
-    const parts = path.split('\\')
-    // Get the last part, which should be "useProva.js"
-    const fileNameWithExt = parts[parts.length - 1]
-    // Split the file name by dot to separate the name from the extension
-    const [name, extension] = fileNameWithExt.split('.')
-    // Return the object with the extracted information
-    return { name, extension }
+export function extractFileInfo(filePath: string) {
+    // Normalize Windows separators so it works on every platform
+    const { name, ext } = path.parse(filePath.replace(/\\/g, '/'))
+    return { name, extension: ext.replace(/^\./, '') }
 }
 
 export function generateRandomHash() {
