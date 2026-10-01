@@ -12,6 +12,7 @@ describe('AppFileList', () => {
             files: [
                 { id: 'a', name: 'Button', extension: 'vue', status: 'beta', path: '/x' },
                 { id: 'b', name: 'useCounter', extension: 'js' },
+                { id: 'c', name: 'useTyped', extension: 'ts' },
             ],
         })
         const [components, composables] = wrapper.findAllComponents(AppList)
@@ -21,6 +22,7 @@ describe('AppFileList', () => {
         expect(composables.props('title')).toBe('Composable')
         expect(composables.props('items')).toEqual([
             { id: 'b', name: 'useCounter', extension: 'js', status: undefined },
+            { id: 'c', name: 'useTyped', extension: 'ts', status: undefined },
         ])
     })
 

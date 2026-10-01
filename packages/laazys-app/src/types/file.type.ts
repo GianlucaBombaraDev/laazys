@@ -3,6 +3,7 @@ export type PropTypes =
 
 export type IProp = {
     name: string
+    description?: string
     // vue-docgen-api shape, e.g. { func: false, value: "false" }
     defaultValue?: { func?: boolean; value: string }
     type?: { name: PropTypes }

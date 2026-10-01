@@ -32,11 +32,11 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="fixed top-0 left-[300px] grid h-full w-[calc(100%-300px)] grid-cols-3 gap-4 bg-gray-50 p-4">
-        <AppFileHeader v-if="current_file" v-bind="current_file" />
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <AppFileHeader v-if="current_file" v-bind="current_file" class="lg:col-span-3" />
 
-        <div class="col-span-2 bg-white px-4">
-            <div class="mt-4 flex flex-col gap-y-2">
+        <div class="rounded-2xl border bg-surface p-4 lg:col-span-2">
+            <div class="flex flex-col gap-y-2">
                 <AppFileProperties v-if="current_file?.props" label="props" :properties="current_file?.props" />
                 <AppFileProperties v-if="current_file?.slots" label="slots" :properties="current_file?.slots" />
                 <AppFileProperties v-if="current_file?.events" label="emits" :properties="current_file?.events" />

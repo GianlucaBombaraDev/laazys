@@ -1,38 +1,52 @@
 import { mount } from '@vue/test-utils'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import AppThemeSwitch from '../src/components/AppThemeSwitch.vue'
 
 const mountSwitch = () => mount(AppThemeSwitch, { global: { stubs: { AppIcon: true } } })
+const prefersDark = (matches: boolean) => vi.spyOn(window, 'matchMedia').mockReturnValue({ matches } as MediaQueryList)
 
 afterEach(() => {
-    document.body.classList.remove('dark-theme')
+    vi.restoreAllMocks()
+    localStorage.clear()
+    document.body.className = ''
 })
 
 describe('AppThemeSwitch', () => {
-    it('starts in light mode with the sun highlighted', () => {
-        const [sun, moon] = mountSwitch().findAll('.rounded-full')
+    it('starts from the system preference without saving it', () => {
+        prefersDark(true)
+        const [sun, moon] = mountSwitch().findAll('button')
 
-        expect(sun.classes()).toContain('bg-accent')
-        expect(moon.classes()).not.toContain('bg-accent')
-        expect(document.body.classList).not.toContain('dark-theme')
+        expect(document.body.classList).toContain('dark-theme')
+        expect(moon.attributes('aria-pressed')).toBe('true')
+        expect(sun.attributes('aria-pressed')).toBe('false')
+        expect(localStorage.getItem('laazys-theme')).toBeNull()
     })
 
-    it('toggles the dark theme on the body', async () => {
+    it('switches theme and remembers the choice', async () => {
+        prefersDark(false)
         const wrapper = mountSwitch()
-        const [sun, moon] = wrapper.findAll('.rounded-full')
+        const [sun, moon] = wrapper.findAll('button')
+        expect(sun.classes()).toContain('bg-accent')
 
         await moon.trigger('click')
         expect(document.body.classList).toContain('dark-theme')
         expect(moon.classes()).toContain('bg-accent')
         expect(sun.classes()).not.toContain('bg-accent')
+        expect(localStorage.getItem('laazys-theme')).toBe('dark')
 
         await sun.trigger('click')
         expect(document.body.classList).not.toContain('dark-theme')
+        expect(localStorage.getItem('laazys-theme')).toBe('light')
     })
 
-    it('shows a sun and a moon icon', () => {
-        const icons = mountSwitch().findAll('app-icon-stub')
+    it('labels the buttons and their icons', () => {
+        prefersDark(false)
+        const wrapper = mountSwitch()
 
-        expect(icons.map((icon) => icon.attributes('name'))).toEqual(['sun', 'moon'])
+        expect(wrapper.findAll('button').map((button) => button.attributes('aria-label'))).toEqual([
+            'Tema chiaro',
+            'Tema scuro',
+        ])
+        expect(wrapper.findAll('app-icon-stub').map((icon) => icon.attributes('name'))).toEqual(['sun', 'moon'])
     })
 })

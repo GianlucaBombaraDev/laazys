@@ -3,7 +3,6 @@ import { computed } from 'vue'
 import hljs from 'highlight.js/lib/core'
 import javascript from 'highlight.js/lib/languages/javascript'
 import xml from 'highlight.js/lib/languages/xml'
-import 'highlight.js/styles/default.css'
 
 hljs.registerLanguage('javascript', javascript)
 hljs.registerLanguage('xml', xml)
@@ -21,7 +20,7 @@ const componentCodePreview = computed(() => hljs.highlightAuto(props.source).val
 </script>
 
 <template>
-    <div class="mt-4 h-[250px] w-full rounded-2xl border bg-white p-4 shadow-xs">
+    <div class="max-h-[400px] w-full overflow-auto rounded-2xl border bg-surface p-4 shadow-xs">
         <pre v-if="componentCodePreview && componentCodePreview !== ''" v-html="componentCodePreview"></pre>
     </div>
 </template>

@@ -27,7 +27,7 @@ describe('AppFileProperties', () => {
         expect(rows[0].find('.text-purple-400').text()).toBe('boolean')
         expect(rows[1].find('.text-green-400').text()).toBe('number')
         expect(rows[2].find('.text-blue-400').text()).toBe('string')
-        expect(rows[3].find('.text-black').text()).toBe('function')
+        expect(rows[3].find('.text-bodyText').text()).toBe('function')
     })
 
     it('shows the default value, not the raw vue-docgen object', () => {

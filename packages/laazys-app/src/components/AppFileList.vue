@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import AppList from './AppList.vue'
-
-type File = {
-    extension: string
-    name: string
-    id: string
-    status: string
-}
+import type { File } from '../types/file.type'
 
 interface Props {
     files?: File[]
@@ -19,7 +13,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 const componentList = computed<any>(() => mapFiles(props.files.filter((file) => file.extension === 'vue')))
 
-const composableList = computed<any>(() => mapFiles(props.files.filter((file) => file.extension === 'js')))
+// .js and .ts composables
+const composableList = computed<any>(() => mapFiles(props.files.filter((file) => file.extension !== 'vue')))
 
 function mapFiles(files: any) {
     return files.map((file: any) => ({

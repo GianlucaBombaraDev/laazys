@@ -11,7 +11,7 @@ function getTypeColor(type: string) {
         boolean: 'text-purple-400',
         number: 'text-green-400',
         string: 'text-blue-400',
-        default: 'text-black',
+        default: 'text-bodyText',
     }
 
     return typeMap[type] !== undefined ? typeMap[type] : typeMap['default']
@@ -19,9 +19,9 @@ function getTypeColor(type: string) {
 </script>
 
 <template>
-    <div v-for="prop in properties" :key="prop.name" class="grid grid-cols-4 gap-[20px]">
+    <div v-for="prop in properties" :key="prop.name" class="grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-4">
         <div class="flex items-center">
-            <span class="mr-2 inline-block rounded-lg bg-gray-200 px-2 py-1 text-center text-xs font-medium uppercase">
+            <span class="mr-2 inline-block rounded-lg bg-line px-2 py-1 text-center text-xs font-medium uppercase">
                 {{ label }}
             </span>
             <span class="font-semibold">{{ prop.name }}</span>

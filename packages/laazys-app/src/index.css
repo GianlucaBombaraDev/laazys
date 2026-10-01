@@ -3,21 +3,18 @@
 /* Theme colors are still defined in the v3-style JS config */
 @config '../tailwind.config.js';
 
-/* Tailwind v4 defaults border-color to currentColor, keep the v3 gray-200 default */
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
+/*
+ * Color tokens, as "R G B" triplets so Tailwind can add opacity (bg-surface/50).
+ * The UI tokens (body, surface, body-text, muted, line, primary, accent) can be overridden
+ * with `laazys --theme`: the custom values are injected by useTheme after this file.
+ */
 @layer base {
     :root {
-        --color-body: 249 239 219;
-        --color-body-text: 0 0 0;
+        --color-body: 249 250 251;
+        --color-surface: 255 255 255;
+        --color-body-text: 17 24 39;
+        --color-muted: 107 114 128;
+        --color-line: 229 231 235;
         --color-primary: 61 85 137;
         --color-accent: 134 133 192;
 
@@ -38,12 +35,68 @@
 
         --color-deprecated-text: 49 54 63;
         --color-deprecated-bg: 232 234 237;
+
+        /* Syntax highlighting of the usage snippet */
+        --color-code-name: 34 86 166;
+        --color-code-attr: 125 60 152;
+        --color-code-string: 3 115 75;
+        --color-code-punctuation: 107 114 128;
     }
 
     .dark-theme {
-        --color-body: 23 30 83;
-        --color-body-text: 255 255 255;
-        --color-primary: 61 85 137;
+        --color-body: 15 18 41;
+        --color-surface: 26 31 64;
+        --color-body-text: 241 245 249;
+        --color-muted: 148 163 184;
+        --color-line: 51 60 99;
+        --color-primary: 165 180 252;
         --color-accent: 134 133 192;
+
+        --color-code-name: 147 197 253;
+        --color-code-attr: 216 180 254;
+        --color-code-string: 134 239 172;
+        --color-code-punctuation: 148 163 184;
+    }
+
+    body {
+        background-color: rgb(var(--color-body));
+        color: rgb(var(--color-body-text));
+    }
+
+    /* Tailwind v4 defaults border-color to currentColor: use the theme's line color */
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: rgb(var(--color-line));
+    }
+}
+
+/* highlight.js token classes, themed for light and dark mode */
+@layer components {
+    .hljs-name,
+    .hljs-title,
+    .hljs-keyword {
+        color: rgb(var(--color-code-name));
+        font-weight: 600;
+    }
+
+    .hljs-attr,
+    .hljs-params,
+    .hljs-built_in {
+        color: rgb(var(--color-code-attr));
+    }
+
+    .hljs-string,
+    .hljs-number,
+    .hljs-literal {
+        color: rgb(var(--color-code-string));
+    }
+
+    .hljs-tag,
+    .hljs-comment,
+    .hljs-punctuation {
+        color: rgb(var(--color-code-punctuation));
     }
 }

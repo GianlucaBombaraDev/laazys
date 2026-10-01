@@ -17,7 +17,7 @@ withDefaults(defineProps<Props>(), {
 <template>
     <div class="flex flex-col">
         <h2 class="text-xl font-bold">{{ name }}</h2>
-        <p class="mt-2 inline-block text-sm">
+        <p class="mt-2 inline-block text-sm break-all text-muted">
             {{ path }}
         </p>
         <p v-if="description && description !== ''" class="mt-2 inline-block">

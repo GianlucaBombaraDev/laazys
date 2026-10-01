@@ -4,7 +4,10 @@ export default {
         extend: {
             colors: {
                 body: 'rgb(var(--color-body) / <alpha-value>)',
+                surface: 'rgb(var(--color-surface) / <alpha-value>)',
                 bodyText: 'rgb(var(--color-body-text) / <alpha-value>)',
+                muted: 'rgb(var(--color-muted) / <alpha-value>)',
+                line: 'rgb(var(--color-line) / <alpha-value>)',
                 primary: 'rgb(var(--color-primary) / <alpha-value>)',
                 accent: 'rgb(var(--color-accent) / <alpha-value>)',
                 warning: {

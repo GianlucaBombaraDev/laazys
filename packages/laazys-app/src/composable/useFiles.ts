@@ -32,8 +32,33 @@ export function useFiles() {
         return response.data
     }
 
+    async function getTheme() {
+        let response
+
+        try {
+            response = await axios.get('/theme.json')
+        } catch (error) {
+            console.error('Error loading theme:', error)
+            response = { data: {} }
+        }
+
+        return response.data
+    }
+
+    /**
+     * Call `callback` whenever the CLI regenerates the docs (`laazys --watch`).
+     * Returns a function that stops listening.
+     */
+    function onFilesUpdate(callback: () => void) {
+        const events = new EventSource('/events')
+        events.addEventListener('update', callback)
+        return () => events.close()
+    }
+
     return {
         getFiles,
         getIcons,
+        getTheme,
+        onFilesUpdate,
     }
 }
