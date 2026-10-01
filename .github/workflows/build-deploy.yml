@@ -12,31 +12,28 @@ jobs:
           packages: write
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v7
               with:
                   # Fetches all history for all tags and branches
                   fetch-depth: 0
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-                  registry-url: https://npm.pkg.github.com
-
+            # Uses the version pinned in the root package.json "packageManager" field
             - name: Install PNPM
-              run: npm install -g pnpm
+              uses: pnpm/action-setup@v6
 
-            - name: Install Dependencies - Laazys App
-              run: pnpm install
-              working-directory: ./packages/laazys-app
+            - name: Setup Node.js
+              uses: actions/setup-node@v7
+              with:
+                  node-version: 24
+                  registry-url: https://npm.pkg.github.com
+                  cache: pnpm
+
+            - name: Install Dependencies
+              run: pnpm install --frozen-lockfile
 
             - name: Build Laazys App
               run: pnpm run build
               working-directory: ./packages/laazys-app
-
-            - name: Install Dependencies - Laazys
-              run: pnpm install
-              working-directory: ./packages/laazys
 
             - name: Build Laazys
               run: pnpm run build
@@ -46,4 +43,3 @@ jobs:
               run: pnpm publish --filter ./packages/laazys --registry=https://npm.pkg.github.com --no-git-checks
               env:
                 NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
