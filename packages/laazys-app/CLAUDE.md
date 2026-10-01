@@ -11,6 +11,12 @@ pnpm dev     # Vite dev server; /files is fetched from the same origin, so data 
 
 `vue-tsc` runs as part of `build` and is the type check for this package. It is stricter in v3: for example, it rejects `v-bind` of an object that may be `null`.
 
+## Tests
+
+`__tests__/` (happy-dom + @vue/test-utils):
+- Use `createTestRouter()` from `__tests__/helpers.ts` (real router, memory history, same route names) and a real Pinia. Mock only `axios` or `useFiles`.
+- `main.test.ts` boots the real entry point at `/` and `/file/:id` to cover both lazy routes.
+
 ## Architecture
 
 - Routes in `src/main.ts`: `/` (Home) and `/file/:id` (File), lazily loaded, history mode.
