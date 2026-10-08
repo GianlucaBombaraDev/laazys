@@ -1,6 +1,6 @@
 {
   "name": "@gianlucabombaradev/laazys",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Generate browsable documentation for Vue.js components and composables from their JSDoc comments",
   "keywords": [
     "vue",
